@@ -1,6 +1,15 @@
 # pokesort
 
-A new Flutter project.
+My project about an app managing pokemon cards in binders:
+
+1) Be able to handle user log in (still figuring out if I want to handle everything locally or talk via server)
+2) Handle user data:
+    a) Manage pictures
+    b) Manage location in virtual binder relative to real binder
+    c) Manage data on card to allow for search function
+3) Allow user to change location of where cards are located
+4) Provide autosaving and undo (optional but prefer to add)
+
 
 ## Getting Started
 
