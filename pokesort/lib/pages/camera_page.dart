@@ -2,91 +2,112 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 
 class CameraPage extends StatefulWidget {
-  final List<CameraDescription> cameras;
-
-  const CameraPage({super.key, required this.cameras});
-
-  static Future<String?> takePicture(BuildContext context) async {
-    final cameras = await availableCameras();
-
-    return Navigator.push<String>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CameraPage(cameras: cameras),
-      ),
-    );
-  }
+  const CameraPage({super.key});
 
   @override
   State<CameraPage> createState() => _CameraPageState();
 }
 
-class _CameraPageState extends State<CameraPage> 
-{
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+class _CameraPageState extends State<CameraPage> {
+  CameraController? _controller;
+  Future<void>? _initializeControllerFuture;
+  List<CameraDescription> cameras = [];
 
   @override
-  void initState()
-  {
+  void initState() {
     super.initState();
+    _initializeCamera();
+  }
 
-    _controller = CameraController(
-      widget.cameras.first,
+  Future<void> _initializeCamera() async {
+    cameras = await availableCameras();
+
+    final controller = CameraController(
+      cameras.first,
       ResolutionPreset.medium,
     );
 
-    _initializeControllerFuture = _controller.initialize();
+    final initializeFuture = controller.initialize();
+
+    setState(() {
+      _controller = controller;
+      _initializeControllerFuture = initializeFuture;
+    });
+
+    await initializeFuture;
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
-  void dispose() 
-  {
-    _controller.dispose();
+  void dispose() {
+    _controller?.dispose();
     super.dispose();
   }
 
-  Future<void> _capture() async
-  {
+  Future<void> _capture() async {
     try {
-      await _initializeControllerFuture;
+      if (_controller == null || _initializeControllerFuture == null) return;
 
-      final image = await _controller.takePicture();
+      await _initializeControllerFuture!;
+
+      final image = await _controller!.takePicture();
 
       if (!mounted) return;
 
       Navigator.pop(context, image.path);
     } catch (e) {
-      print(e);
+      debugPrint('$e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_controller == null || _initializeControllerFuture == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text("Take Picture")),
-      body: FutureBuilder(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-
-          if (snapshot.connectionState == ConnectionState.done) {
-
-            return Center(
-              child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: CameraPreview(_controller),
+      body: Stack(
+        children: [
+          FutureBuilder<void>(
+            future: _initializeControllerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return Center(
+                  child: AspectRatio(
+                    aspectRatio: _controller!.value.aspectRatio,
+                    child: CameraPreview(_controller!),
+                  ),
+                );
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: GestureDetector(
+                onTap: _capture,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 5),
+                  ),
+                ),
               ),
-            );
-
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _capture,
-        child: const Icon(Icons.camera),
+            ),
+          ),
+        ],
       ),
     );
   }
