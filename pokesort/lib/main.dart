@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'services/image_service.dart';
+import 'pages/binder_list_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,37 +11,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  Future<void> _openCamera(BuildContext context) async {
-    final imagePath = await ImageService.takePicture(context);
-
-    if (imagePath != null) {
-      print("Image saved at: $imagePath");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Picture saved: $imagePath")),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Binder Camera Test")),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () => _openCamera(context),
-          child: const Text("Take Picture"),
-        ),
+    return MaterialApp(
+      title: 'PokeSort',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        useMaterial3: true,
       ),
+      home: const BinderListPage(),
     );
   }
 }

@@ -1,0 +1,241 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+
+import '../models/card_enums.dart';
+import '../models/card_model.dart';
+import '../services/binder_database.dart';
+
+class AddCardPage extends StatefulWidget {
+  final int binderId;
+  final String imagePath;
+
+  const AddCardPage({
+    super.key,
+    required this.binderId,
+    required this.imagePath,
+  });
+
+  @override
+  State<AddCardPage> createState() => _AddCardPageState();
+}
+
+class _AddCardPageState extends State<AddCardPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _priceController = TextEditingController();
+
+  CardLanguage _selectedLanguage = CardLanguage.english;
+  CardType _selectedType = CardType.grass;
+  CardStage _selectedStage = CardStage.basic;
+  CardRarity _selectedRarity = CardRarity.common;
+  CardVariant _selectedVariant = CardVariant.normal;
+
+  bool _legendary = false;
+  bool _forSale = false;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveCard() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _saving = true;
+    });
+
+    final card = CardModel(
+      binderId: widget.binderId,
+      name: _nameController.text.trim(),
+      imagePath: widget.imagePath,
+      cardLanguage: _selectedLanguage,
+      type: _selectedType,
+      stage: _selectedStage,
+      rarity: _selectedRarity,
+      variant: _selectedVariant,
+      legendary: _legendary,
+      forSale: _forSale,
+      price: _forSale && _priceController.text.trim().isNotEmpty
+          ? double.tryParse(_priceController.text.trim())
+          : null,
+    );
+
+    await BinderDatabase.instance.insertCard(card);
+
+    if (!mounted) return;
+    Navigator.pop(context, true);
+  }
+
+  DropdownButtonFormField<T> _buildEnumDropdown<T>({
+    required String label,
+    required T value,
+    required List<T> values,
+    required String Function(T) labelBuilder,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      items: values.map((item) {
+        return DropdownMenuItem<T>(
+          value: item,
+          child: Text(labelBuilder(item)),
+        );
+      }).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Card'),
+      ),
+      body: _saving
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(widget.imagePath),
+                      height: 240,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Card Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Enter the card name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEnumDropdown<CardLanguage>(
+                    label: 'Language',
+                    value: _selectedLanguage,
+                    values: CardLanguage.values,
+                    labelBuilder: languageToString,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedLanguage = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEnumDropdown<CardType>(
+                    label: 'Type',
+                    value: _selectedType,
+                    values: CardType.values,
+                    labelBuilder: cardTypeToString,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedType = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEnumDropdown<CardStage>(
+                    label: 'Stage',
+                    value: _selectedStage,
+                    values: CardStage.values,
+                    labelBuilder: stageToString,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedStage = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEnumDropdown<CardRarity>(
+                    label: 'Rarity',
+                    value: _selectedRarity,
+                    values: CardRarity.values,
+                    labelBuilder: rarityToString,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedRarity = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEnumDropdown<CardVariant>(
+                    label: 'Variant',
+                    value: _selectedVariant,
+                    values: CardVariant.values,
+                    labelBuilder: variantToString,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedVariant = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    value: _legendary,
+                    onChanged: (value) {
+                      setState(() => _legendary = value);
+                    },
+                    title: const Text('Legendary'),
+                  ),
+                  SwitchListTile(
+                    value: _forSale,
+                    onChanged: (value) {
+                      setState(() => _forSale = value);
+                    },
+                    title: const Text('For Sale'),
+                  ),
+                  if (_forSale) ...[
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: const InputDecoration(
+                        labelText: 'Price',
+                        border: OutlineInputBorder(),
+                        prefixText: '\$',
+                      ),
+                      validator: (value) {
+                        if (!_forSale) return null;
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Enter a price';
+                        }
+                        if (double.tryParse(value.trim()) == null) {
+                          return 'Enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: _saveCard,
+                    child: const Text('Save Card'),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}
