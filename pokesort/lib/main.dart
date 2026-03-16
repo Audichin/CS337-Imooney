@@ -1,11 +1,7 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'pages/camera_page.dart';
 
-late final List<CameraDescription> cameras;
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  cameras = await availableCameras();
+void main() {
   runApp(const MyApp());
 }
 
@@ -14,53 +10,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: CameraPage(camera: cameras.first),
+    return const MaterialApp(
+      home: HomePage(),
     );
   }
 }
 
-class CameraPage extends StatefulWidget {
-  final CameraDescription camera;
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
-  const CameraPage({super.key, required this.camera});
+  Future<void> _openCamera(BuildContext context) async {
+    final imagePath = await CameraPage.takePicture(context);
 
-  @override
-  State<CameraPage> createState() => _CameraPageState();
-}
+    if (imagePath != null) {
+      print("Image saved at: $imagePath");
 
-class _CameraPageState extends State<CameraPage> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = CameraController(
-      widget.camera,
-      ResolutionPreset.medium,
-    );
-    _initializeControllerFuture = _controller.initialize();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Picture saved: $imagePath")),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Camera')),
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(_controller);
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
+      appBar: AppBar(title: const Text("Binder Camera Test")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => _openCamera(context),
+          child: const Text("Take Picture"),
+        ),
       ),
     );
   }
