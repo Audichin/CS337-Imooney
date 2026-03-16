@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../models/binder.dart';
+import '../models/card_enums.dart';
 import '../models/card_model.dart';
 import '../services/binder_database.dart';
 import '../services/image_service.dart';
@@ -64,7 +65,8 @@ class _BinderPageState extends State<BinderPage> {
             child: Image.file(
               File(card.imagePath),
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.image_not_supported),
             ),
           ),
           Padding(

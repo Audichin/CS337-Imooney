@@ -3,7 +3,6 @@ import 'card_enums.dart';
 class CardModel {
   final int? id;
   final int binderId;
-
   final String name;
   final String imagePath;
 

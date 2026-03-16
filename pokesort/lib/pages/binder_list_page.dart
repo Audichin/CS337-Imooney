@@ -61,7 +61,8 @@ class _BinderListPageState extends State<BinderListPage> {
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () async {
-                        final imagePath = await ImageService.takePicture(context);
+                        final imagePath =
+                            await ImageService.takePicture(context);
                         if (imagePath != null) {
                           setDialogState(() {
                             coverImage = imagePath;
@@ -85,7 +86,10 @@ class _BinderListPageState extends State<BinderListPage> {
                     if (name.isEmpty) return;
 
                     await BinderDatabase.instance.insertBinder(
-                      Binder(name: name, coverImage: coverImage),
+                      Binder(
+                        name: name,
+                        coverImage: coverImage,
+                      ),
                     );
 
                     if (!mounted) return;
