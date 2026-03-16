@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'pages/camera_page.dart';
+
+import 'services/image_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +21,7 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   Future<void> _openCamera(BuildContext context) async {
-    final imagePath = await CameraPage.takePicture(context);
+    final imagePath = await ImageService.takePicture(context);
 
     if (imagePath != null) {
       print("Image saved at: $imagePath");
