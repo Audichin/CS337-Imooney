@@ -101,7 +101,8 @@ class _CameraPageState extends State<CameraPage> {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 5),
+                    border: Border.all(color: const Color.fromARGB(255, 0, 0, 0), width: 5),
+                    color: const Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),
               ),

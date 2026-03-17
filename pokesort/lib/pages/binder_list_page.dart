@@ -161,7 +161,7 @@ class _BinderListPageState extends State<BinderListPage> {
 
           if (binders.isEmpty) {
             return const Center(
-              child: Text('No binders yet. Tap + to create one.'),
+              child: Text('You have no binders yet. Tap + to create one!'),
             );
           }
 

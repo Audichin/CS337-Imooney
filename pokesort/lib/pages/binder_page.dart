@@ -43,7 +43,7 @@ class _BinderPageState extends State<BinderPage> {
   }
 
   Future<void> _addCard() async {
-    debugPrint('Add card button tapped');
+    debugPrint('Add card pressed');
 
     final imagePath = await ImageService.takePicture(context);
     if (imagePath == null) return;
@@ -163,12 +163,67 @@ class _BinderPageState extends State<BinderPage> {
             ),
           ),
           const SizedBox(height: 12),
-          Text(
-            'Page $pageNumber of ${widget.binder.pageCount}',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 80),
+          decoration: BoxDecoration(
+            shape: BoxShape. 
+          )
         ],
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return SafeArea(
+      top: false,
+      child: Material(
+        elevation: 8,
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FilledButton.icon(
+                onPressed: _addCard,
+                icon: const Icon(Icons.add),
+                label: const Text('Add Card'),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: _currentPageIndex > 0
+                        ? () {
+                            _pageController.previousPage(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.chevron_left),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Page ${_currentPageIndex + 1} / ${widget.binder.pageCount}',
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _currentPageIndex < widget.binder.pageCount - 1
+                        ? () {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -203,52 +258,7 @@ class _BinderPageState extends State<BinderPage> {
           );
         },
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: _currentPageIndex > 0
-                    ? () {
-                        _pageController.previousPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    : null,
-                icon: const Icon(Icons.chevron_left),
-              ),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    'Page ${_currentPageIndex + 1} / ${widget.binder.pageCount}',
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: _currentPageIndex < widget.binder.pageCount - 1
-                    ? () {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    : null,
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'binder_page_add_card',
-        onPressed: _addCard,
-        icon: const Icon(Icons.add),
-        label: const Text('Add Card'),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 }
