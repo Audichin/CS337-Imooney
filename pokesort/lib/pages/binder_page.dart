@@ -43,9 +43,10 @@ class _BinderPageState extends State<BinderPage> {
   }
 
   Future<void> _addCard() async {
+    debugPrint('Add card button tapped');
+
     final imagePath = await ImageService.takePicture(context);
     if (imagePath == null) return;
-
     if (!mounted) return;
 
     final added = await Navigator.push<bool>(
@@ -148,7 +149,7 @@ class _BinderPageState extends State<BinderPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Column(
         children: [
           Expanded(
@@ -166,6 +167,7 @@ class _BinderPageState extends State<BinderPage> {
             'Page $pageNumber of ${widget.binder.pageCount}',
             style: Theme.of(context).textTheme.titleMedium,
           ),
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -201,46 +203,52 @@ class _BinderPageState extends State<BinderPage> {
           );
         },
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: _currentPageIndex > 0
-                  ? () {
-                      _pageController.previousPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  : null,
-              icon: const Icon(Icons.chevron_left),
-            ),
-            Expanded(
-              child: Center(
-                child: Text(
-                  'Page ${_currentPageIndex + 1} / ${widget.binder.pageCount}',
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: _currentPageIndex > 0
+                    ? () {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    : null,
+                icon: const Icon(Icons.chevron_left),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Page ${_currentPageIndex + 1} / ${widget.binder.pageCount}',
+                  ),
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: _currentPageIndex < widget.binder.pageCount - 1
-                  ? () {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  : null,
-              icon: const Icon(Icons.chevron_right),
-            ),
-          ],
+              IconButton(
+                onPressed: _currentPageIndex < widget.binder.pageCount - 1
+                    ? () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    : null,
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'binder_page_add_card',
         onPressed: _addCard,
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Card'),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

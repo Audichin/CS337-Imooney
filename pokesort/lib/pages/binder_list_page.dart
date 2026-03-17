@@ -70,8 +70,9 @@ class _BinderListPageState extends State<BinderListPage> {
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () async {
-                        final imagePath =
-                            await ImageService.takePicture(context);
+                        final imagePath = await ImageService.takePicture(
+                          context,
+                        );
                         if (imagePath != null) {
                           setDialogState(() {
                             coverImage = imagePath;
@@ -92,8 +93,9 @@ class _BinderListPageState extends State<BinderListPage> {
                 FilledButton(
                   onPressed: () async {
                     final name = nameController.text.trim();
-                    final pageCount =
-                        int.tryParse(pageCountController.text.trim());
+                    final pageCount = int.tryParse(
+                      pageCountController.text.trim(),
+                    );
 
                     if (name.isEmpty || pageCount == null || pageCount < 1) {
                       return;
@@ -131,18 +133,14 @@ class _BinderListPageState extends State<BinderListPage> {
     return ListTile(
       leading: binder.coverImage == null
           ? const CircleAvatar(child: Icon(Icons.book))
-          : CircleAvatar(
-              backgroundImage: FileImage(File(binder.coverImage!)),
-            ),
+          : CircleAvatar(backgroundImage: FileImage(File(binder.coverImage!))),
       title: Text(binder.name),
       subtitle: Text('${binder.pageCount} page(s)'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => BinderPage(binder: binder),
-          ),
+          MaterialPageRoute(builder: (_) => BinderPage(binder: binder)),
         );
       },
     );
@@ -151,9 +149,7 @@ class _BinderListPageState extends State<BinderListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Binders'),
-      ),
+      appBar: AppBar(title: const Text('My Binders')),
       body: FutureBuilder<List<Binder>>(
         future: _bindersFuture,
         builder: (context, snapshot) {
@@ -177,6 +173,7 @@ class _BinderListPageState extends State<BinderListPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'binder_list_fab',
         onPressed: _createBinder,
         child: const Icon(Icons.add),
       ),
