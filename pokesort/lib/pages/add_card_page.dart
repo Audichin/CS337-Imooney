@@ -58,7 +58,7 @@ class _AddCardPageState extends State<AddCardPage> {
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      initialValue: value,
+      value: value,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
