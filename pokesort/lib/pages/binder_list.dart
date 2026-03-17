@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../models/binder.dart';
-import '../services/binder_database.dart';
-import '../services/image_service.dart';
-import 'binder_page.dart';
+import '../../../models/binder.dart';
+import '../../../services/binder_database.dart';
+import '../../../services/image_service.dart';
+import '../../binder_page.dart';
 
 class BinderListPage extends StatefulWidget {
   const BinderListPage({super.key});

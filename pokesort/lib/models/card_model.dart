@@ -16,6 +16,10 @@ class CardModel {
   final bool forSale;
   final double? price;
 
+  final int pageNumber; // 1-based
+  final int row; // 1-3
+  final int column; // 1-3
+
   CardModel({
     this.id,
     required this.binderId,
@@ -29,6 +33,9 @@ class CardModel {
     required this.legendary,
     required this.forSale,
     this.price,
+    required this.pageNumber,
+    required this.row,
+    required this.column,
   });
 
   Map<String, dynamic> toMap() {
@@ -45,6 +52,9 @@ class CardModel {
       'legendary': legendary ? 1 : 0,
       'forSale': forSale ? 1 : 0,
       'price': price,
+      'pageNumber': pageNumber,
+      'row': row,
+      'column': column,
     };
   }
 
@@ -62,6 +72,9 @@ class CardModel {
       legendary: (map['legendary'] as int) == 1,
       forSale: (map['forSale'] as int) == 1,
       price: map['price'] == null ? null : (map['price'] as num).toDouble(),
+      pageNumber: map['pageNumber'] as int,
+      row: map['row'] as int,
+      column: map['column'] as int,
     );
   }
 }

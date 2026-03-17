@@ -29,6 +29,7 @@ class _BinderListPageState extends State<BinderListPage> {
 
   Future<void> _createBinder() async {
     final nameController = TextEditingController();
+    final pageCountController = TextEditingController(text: '1');
     String? coverImage;
 
     final created = await showDialog<bool>(
@@ -46,6 +47,14 @@ class _BinderListPageState extends State<BinderListPage> {
                       controller: nameController,
                       decoration: const InputDecoration(
                         labelText: 'Binder Name',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: pageCountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Number of Pages',
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -83,12 +92,18 @@ class _BinderListPageState extends State<BinderListPage> {
                 FilledButton(
                   onPressed: () async {
                     final name = nameController.text.trim();
-                    if (name.isEmpty) return;
+                    final pageCount =
+                        int.tryParse(pageCountController.text.trim());
+
+                    if (name.isEmpty || pageCount == null || pageCount < 1) {
+                      return;
+                    }
 
                     await BinderDatabase.instance.insertBinder(
                       Binder(
                         name: name,
                         coverImage: coverImage,
+                        pageCount: pageCount,
                       ),
                     );
 
@@ -105,6 +120,7 @@ class _BinderListPageState extends State<BinderListPage> {
     );
 
     nameController.dispose();
+    pageCountController.dispose();
 
     if (created == true) {
       setState(_loadBinders);
@@ -119,6 +135,7 @@ class _BinderListPageState extends State<BinderListPage> {
               backgroundImage: FileImage(File(binder.coverImage!)),
             ),
       title: Text(binder.name),
+      subtitle: Text('${binder.pageCount} page(s)'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.push(

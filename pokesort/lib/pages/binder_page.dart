@@ -23,11 +23,19 @@ class BinderPage extends StatefulWidget {
 
 class _BinderPageState extends State<BinderPage> {
   late Future<List<CardModel>> _cardsFuture;
+  final PageController _pageController = PageController();
+  int _currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _loadCards();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _loadCards() {
@@ -45,6 +53,7 @@ class _BinderPageState extends State<BinderPage> {
       MaterialPageRoute(
         builder: (_) => AddCardPage(
           binderId: widget.binder.id!,
+          binderPageCount: widget.binder.pageCount,
           imagePath: imagePath,
         ),
       ),
@@ -55,7 +64,41 @@ class _BinderPageState extends State<BinderPage> {
     }
   }
 
-  Widget _buildCardTile(CardModel card) {
+  CardModel? _findCardForSlot(
+    List<CardModel> cards,
+    int pageNumber,
+    int row,
+    int column,
+  ) {
+    try {
+      return cards.firstWhere(
+        (card) =>
+            card.pageNumber == pageNumber &&
+            card.row == row &&
+            card.column == column,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Widget _buildSlot(CardModel? card) {
+    if (card == null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.add_photo_alternate_outlined,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -94,6 +137,40 @@ class _BinderPageState extends State<BinderPage> {
     );
   }
 
+  Widget _buildBinderSheet(List<CardModel> cards, int pageNumber) {
+    final slots = <Widget>[];
+
+    for (int row = 1; row <= 3; row++) {
+      for (int column = 1; column <= 3; column++) {
+        final card = _findCardForSlot(cards, pageNumber, row, column);
+        slots.add(_buildSlot(card));
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Expanded(
+            child: GridView.count(
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.68,
+              children: slots,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Page $pageNumber of ${widget.binder.pageCount}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,26 +186,56 @@ class _BinderPageState extends State<BinderPage> {
 
           final cards = snapshot.data ?? [];
 
-          if (cards.isEmpty) {
-            return const Center(
-              child: Text('No cards yet. Add your first card.'),
-            );
-          }
-
-          return GridView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: cards.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 0.68,
-            ),
+          return PageView.builder(
+            controller: _pageController,
+            itemCount: widget.binder.pageCount,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPageIndex = index;
+              });
+            },
             itemBuilder: (context, index) {
-              return _buildCardTile(cards[index]);
+              final pageNumber = index + 1;
+              return _buildBinderSheet(cards, pageNumber);
             },
           );
         },
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: _currentPageIndex > 0
+                  ? () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  : null,
+              icon: const Icon(Icons.chevron_left),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'Page ${_currentPageIndex + 1} / ${widget.binder.pageCount}',
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: _currentPageIndex < widget.binder.pageCount - 1
+                  ? () {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  : null,
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addCard,

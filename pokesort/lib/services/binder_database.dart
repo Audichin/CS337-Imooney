@@ -22,7 +22,7 @@ class BinderDatabase {
 
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -33,7 +33,8 @@ class BinderDatabase {
       CREATE TABLE binders(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        coverImage TEXT
+        coverImage TEXT,
+        pageCount INTEGER NOT NULL
       )
     ''');
 
@@ -51,13 +52,17 @@ class BinderDatabase {
         legendary INTEGER NOT NULL,
         forSale INTEGER NOT NULL,
         price REAL,
-        FOREIGN KEY (binderId) REFERENCES binders(id) ON DELETE CASCADE
+        pageNumber INTEGER NOT NULL,
+        row INTEGER NOT NULL,
+        column INTEGER NOT NULL,
+        FOREIGN KEY (binderId) REFERENCES binders(id) ON DELETE CASCADE,
+        UNIQUE(binderId, pageNumber, row, column)
       )
     ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
+    if (oldVersion < 3) {
       await db.execute('DROP TABLE IF EXISTS cards');
       await db.execute('DROP TABLE IF EXISTS binders');
       await _createDB(db, newVersion);
@@ -77,7 +82,11 @@ class BinderDatabase {
 
   Future<int> insertCard(CardModel card) async {
     final db = await database;
-    return db.insert('cards', card.toMap());
+    return db.insert(
+      'cards',
+      card.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.abort,
+    );
   }
 
   Future<List<CardModel>> getCardsByBinder(int binderId) async {
@@ -86,9 +95,26 @@ class BinderDatabase {
       'cards',
       where: 'binderId = ?',
       whereArgs: [binderId],
-      orderBy: 'id ASC',
+      orderBy: 'pageNumber ASC, row ASC, column ASC',
     );
 
     return maps.map((map) => CardModel.fromMap(map)).toList();
+  }
+
+  Future<bool> cardSlotExists({
+    required int binderId,
+    required int pageNumber,
+    required int row,
+    required int column,
+  }) async {
+    final db = await database;
+    final maps = await db.query(
+      'cards',
+      where: 'binderId = ? AND pageNumber = ? AND row = ? AND column = ?',
+      whereArgs: [binderId, pageNumber, row, column],
+      limit: 1,
+    );
+
+    return maps.isNotEmpty;
   }
 }
