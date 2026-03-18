@@ -143,7 +143,7 @@ class _BinderPageState extends State<BinderPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Column(
         children: [
           Expanded(
@@ -156,7 +156,7 @@ class _BinderPageState extends State<BinderPage> {
               children: slots,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 92),
         ],
       ),
     );
@@ -176,62 +176,57 @@ class _BinderPageState extends State<BinderPage> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: Material(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withOpacity(0.22),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Row(
                 children: [
+                  IconButton(
+                    color: Colors.white,
+                    onPressed: previousPage != null
+                        ? () {
+                            _pageController.previousPage(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.chevron_left),
+                  ),
+                  SizedBox(
+                    width: 24,
+                    child: Text(
+                      previousPage?.toString() ?? '',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const Spacer(),
                   FilledButton.icon(
                     onPressed: _addCard,
                     icon: const Icon(Icons.add),
                     label: const Text('Add Card'),
                   ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      IconButton(
-                        color: Colors.white,
-                        onPressed: previousPage != null
-                            ? () {
-                                _pageController.previousPage(
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.easeInOut,
-                                );
-                              }
-                            : null,
-                        icon: const Icon(Icons.chevron_left),
-                      ),
-                      SizedBox(
-                        width: 28,
-                        child: Text(
-                          previousPage?.toString() ?? '',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      const Spacer(),
-                      SizedBox(
-                        width: 28,
-                        child: Text(
-                          nextPage?.toString() ?? '',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      IconButton(
-                        color: Colors.white,
-                        onPressed: nextPage != null
-                            ? () {
-                                _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.easeInOut,
-                                );
-                              }
-                            : null,
-                        icon: const Icon(Icons.chevron_right),
-                      ),
-                    ],
+                  const Spacer(),
+                  SizedBox(
+                    width: 24,
+                    child: Text(
+                      nextPage?.toString() ?? '',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  IconButton(
+                    color: Colors.white,
+                    onPressed: nextPage != null
+                        ? () {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.chevron_right),
                   ),
                 ],
               ),
