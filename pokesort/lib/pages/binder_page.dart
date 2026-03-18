@@ -12,10 +12,7 @@ import 'add_card_page.dart';
 class BinderPage extends StatefulWidget {
   final Binder binder;
 
-  const BinderPage({
-    super.key,
-    required this.binder,
-  });
+  const BinderPage({super.key, required this.binder});
 
   @override
   State<BinderPage> createState() => _BinderPageState();
@@ -92,10 +89,7 @@ class _BinderPageState extends State<BinderPage> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(
-          child: Icon(
-            Icons.add_photo_alternate_outlined,
-            color: Colors.grey,
-          ),
+          child: Icon(Icons.add_photo_alternate_outlined, color: Colors.grey),
         ),
       );
     }
@@ -162,66 +156,86 @@ class _BinderPageState extends State<BinderPage> {
               children: slots,
             ),
           ),
-          const SizedBox(height: 12),
-          decoration: BoxDecoration(
-            shape: BoxShape. 
-          )
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   Widget _buildBottomBar() {
+    final int currentPage = _currentPageIndex + 1;
+    final int? previousPage = currentPage > 1 ? currentPage - 1 : null;
+    final int? nextPage = currentPage < widget.binder.pageCount
+        ? currentPage + 1
+        : null;
+
     return SafeArea(
       top: false,
-      child: Material(
-        elevation: 8,
-        color: Theme.of(context).colorScheme.surface,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FilledButton.icon(
-                onPressed: _addCard,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Card'),
-              ),
-              const SizedBox(height: 8),
-              Row(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Material(
+            color: Colors.black.withOpacity(0.25),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    onPressed: _currentPageIndex > 0
-                        ? () {
-                            _pageController.previousPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        : null,
-                    icon: const Icon(Icons.chevron_left),
+                  FilledButton.icon(
+                    onPressed: _addCard,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Card'),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'Page ${_currentPageIndex + 1} / ${widget.binder.pageCount}',
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      IconButton(
+                        color: Colors.white,
+                        onPressed: previousPage != null
+                            ? () {
+                                _pageController.previousPage(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            : null,
+                        icon: const Icon(Icons.chevron_left),
                       ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _currentPageIndex < widget.binder.pageCount - 1
-                        ? () {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        : null,
-                    icon: const Icon(Icons.chevron_right),
+                      SizedBox(
+                        width: 28,
+                        child: Text(
+                          previousPage?.toString() ?? '',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        width: 28,
+                        child: Text(
+                          nextPage?.toString() ?? '',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      IconButton(
+                        color: Colors.white,
+                        onPressed: nextPage != null
+                            ? () {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            : null,
+                        icon: const Icon(Icons.chevron_right),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -231,9 +245,8 @@ class _BinderPageState extends State<BinderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.binder.name),
-      ),
+      appBar: AppBar(title: Text(widget.binder.name)),
+      extendBody: true,
       body: FutureBuilder<List<CardModel>>(
         future: _cardsFuture,
         builder: (context, snapshot) {
