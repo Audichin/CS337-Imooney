@@ -7,8 +7,13 @@ import '../services/binder_database.dart';
 import '../services/image_service.dart';
 import 'binder_page.dart';
 
+import '../services/app_settings.dart';
+import '../widgets/app_menu_sheet.dart';
+
 class BinderListPage extends StatefulWidget {
-  const BinderListPage({super.key});
+  final AppSettings settings;
+
+  const BinderListPage({super.key, required this.settings});
 
   @override
   State<BinderListPage> createState() => _BinderListPageState();
@@ -16,6 +21,14 @@ class BinderListPage extends StatefulWidget {
 
 class _BinderListPageState extends State<BinderListPage> {
   late Future<List<Binder>> _bindersFuture;
+
+  void _openMenu() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => AppMenuSheet(settings: widget.settings),
+    );
+  }
 
   @override
   void initState() {
@@ -172,10 +185,22 @@ class _BinderListPageState extends State<BinderListPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'binder_list_fab',
-        onPressed: _createBinder,
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.small(
+            heroTag: 'binder_list_menu_fab',
+            onPressed: _openMenu,
+            child: const Icon(Icons.settings),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton(
+            heroTag: 'binder_list_add_fab',
+            onPressed: _createBinder,
+            child: const Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }

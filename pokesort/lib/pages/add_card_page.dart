@@ -60,7 +60,7 @@ class _AddCardPageState extends State<AddCardPage> {
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
@@ -248,7 +248,7 @@ class _AddCardPageState extends State<AddCardPage> {
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
                             labelText: 'Column (1-3)',
-                            border: const OutlineInputBorder(),
+                            border: OutlineInputBorder(),
                           ),
                           validator: (v) {
                             final n = int.tryParse(v?.trim() ?? '');
