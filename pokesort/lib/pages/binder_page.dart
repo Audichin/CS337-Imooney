@@ -9,6 +9,8 @@ import '../services/binder_database.dart';
 import '../services/image_service.dart';
 import 'add_card_page.dart';
 
+import 'card_detail_page.dart';
+
 class BinderPage extends StatefulWidget {
   final Binder binder;
 
@@ -22,6 +24,13 @@ class _BinderPageState extends State<BinderPage> {
   late Future<List<CardModel>> _cardsFuture;
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
+
+  void _openCardDetails(CardModel card) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CardDetailPage(card: card)),
+    );
+  }
 
   @override
   void initState() {
@@ -94,40 +103,44 @@ class _BinderPageState extends State<BinderPage> {
       );
     }
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Image.file(
-              File(card.imagePath),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.image_not_supported),
+    return InkWell(
+      onTap: () => _openCardDetails(card),
+      borderRadius: BorderRadius.circular(12),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Image.file(
+                File(card.imagePath),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.image_not_supported),
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  card.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${rarityToString(card.rarity)} • ${variantToString(card.variant)}',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    card.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${rarityToString(card.rarity)} • ${variantToString(card.variant)}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

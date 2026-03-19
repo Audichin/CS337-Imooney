@@ -36,7 +36,7 @@ class _AddCardPageState extends State<AddCardPage> {
   CardType _selectedType = CardType.grass;
   CardStage _selectedStage = CardStage.basic;
   CardRarity _selectedRarity = CardRarity.common;
-  CardVariant _selectedVariant = CardVariant.normal;
+  CardVariant _selectedVariant = CardVariant.defaultVariant;
 
   bool _legendary = false;
   bool _forSale = false;

@@ -1,5 +1,3 @@
-// lib/models/card_enums.dart
-
 enum CardType {
   grass,
   fire,
@@ -11,48 +9,29 @@ enum CardType {
   metal,
   fairy,
   dragon,
-  colorless
+  colorless,
 }
 
 String cardTypeToString(CardType type) {
   return type.name[0].toUpperCase() + type.name.substring(1);
 }
 
-
-
 enum CardStage {
   basic,
   stage1,
   stage2,
-  ex,
-  gx,
-  v,
-  vmax,
-  vstar
 }
 
 String stageToString(CardStage stage) {
   switch (stage) {
     case CardStage.basic:
-      return "Basic";
+      return 'Basic';
     case CardStage.stage1:
-      return "Stage 1";
+      return 'Stage 1';
     case CardStage.stage2:
-      return "Stage 2";
-    case CardStage.ex:
-      return "EX";
-    case CardStage.gx:
-      return "GX";
-    case CardStage.v:
-      return "V";
-    case CardStage.vmax:
-      return "VMAX";
-    case CardStage.vstar:
-      return "VSTAR";
+      return 'Stage 2';
   }
 }
-
-
 
 enum CardRarity {
   common,
@@ -64,69 +43,99 @@ enum CardRarity {
   illustrationRare,
   specialIllustrationRare,
   hyperRare,
-  promo
+  promo,
 }
 
 String rarityToString(CardRarity rarity) {
   switch (rarity) {
     case CardRarity.common:
-      return "Common";
+      return 'Common';
     case CardRarity.uncommon:
-      return "Uncommon";
+      return 'Uncommon';
     case CardRarity.rare:
-      return "Rare";
+      return 'Rare';
     case CardRarity.holoRare:
-      return "Holo Rare";
+      return 'Holo Rare';
     case CardRarity.doubleRare:
-      return "Double Rare";
+      return 'Double Rare';
     case CardRarity.ultraRare:
-      return "Ultra Rare";
+      return 'Ultra Rare';
     case CardRarity.illustrationRare:
-      return "Illustration Rare";
+      return 'Illustration Rare';
     case CardRarity.specialIllustrationRare:
-      return "Special Illustration Rare";
+      return 'Special Illustration Rare';
     case CardRarity.hyperRare:
-      return "Hyper Rare";
+      return 'Hyper Rare';
     case CardRarity.promo:
-      return "Promo";
+      return 'Promo';
   }
 }
 
 enum CardVariant {
-  normal,
-  fullArt,
-  alternateArt,
-  gold,
-  rainbow,
-  shining,
+  amazingRare,
+  breakCard,
+  dark,
+  defaultVariant,
+  deltaSpecies,
+  ex,
+  gx,
+  legend,
+  lvX,
+  light,
+  megaEx,
+  prime,
   radiant,
-  trainerGallery,
-  illustrationRare,
-  specialIllustrationRare
+  shining,
+  tagTeamGx,
+  trainerPokemon,
+  v,
+  vmax,
+  vstar,
+  notInList,
 }
 
 String variantToString(CardVariant variant) {
   switch (variant) {
-    case CardVariant.normal:
-      return "Normal";
-    case CardVariant.fullArt:
-      return "Full Art";
-    case CardVariant.alternateArt:
-      return "Alternate Art";
-    case CardVariant.gold:
-      return "Gold";
-    case CardVariant.rainbow:
-      return "Rainbow";
-    case CardVariant.shining:
-      return "Shining";
+    case CardVariant.amazingRare:
+      return 'Amazing Rare';
+    case CardVariant.breakCard:
+      return 'BREAK';
+    case CardVariant.dark:
+      return 'Dark';
+    case CardVariant.defaultVariant:
+      return 'None';
+    case CardVariant.deltaSpecies:
+      return 'Delta Species';
+    case CardVariant.ex:
+      return 'EX';
+    case CardVariant.gx:
+      return 'GX';
+    case CardVariant.legend:
+      return 'LEGEND';
+    case CardVariant.lvX:
+      return 'LV.X';
+    case CardVariant.light:
+      return 'Light';
+    case CardVariant.megaEx:
+      return 'Mega (M EX)';
+    case CardVariant.prime:
+      return 'Prime';
     case CardVariant.radiant:
-      return "Radiant";
-    case CardVariant.trainerGallery:
-      return "Trainer Gallery";
-    case CardVariant.illustrationRare:
-      return "Illustration Rare";
-    case CardVariant.specialIllustrationRare:
-      return "Special Illustration Rare";
+      return 'Radiant';
+    case CardVariant.shining:
+      return 'Shining';
+    case CardVariant.tagTeamGx:
+      return 'Tag Team GX';
+    case CardVariant.trainerPokemon:
+      return 'Trainer Pokémon';
+    case CardVariant.v:
+      return 'V';
+    case CardVariant.vmax:
+      return 'VMAX';
+    case CardVariant.vstar:
+      return 'VSTAR';
+    case CardVariant.notInList:
+      return 'Unknown Variant';
   }
 }
 
@@ -138,26 +147,26 @@ enum CardLanguage {
   spanish,
   italian,
   korean,
-  chinese
+  chinese,
 }
 
 String languageToString(CardLanguage language) {
   switch (language) {
     case CardLanguage.english:
-      return "English";
+      return 'English';
     case CardLanguage.japanese:
-      return "Japanese";
+      return 'Japanese';
     case CardLanguage.german:
-      return "German";
+      return 'German';
     case CardLanguage.french:
-      return "French";
+      return 'French';
     case CardLanguage.spanish:
-      return "Spanish";
+      return 'Spanish';
     case CardLanguage.italian:
-      return "Italian";
+      return 'Italian';
     case CardLanguage.korean:
-      return "Korean";
+      return 'Korean';
     case CardLanguage.chinese:
-      return "Chinese";
+      return 'Chinese';
   }
 }
