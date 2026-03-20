@@ -5,9 +5,7 @@ class ImageService {
   static Future<String?> takePicture(BuildContext context) async {
     final imagePath = await Navigator.push<String>(
       context,
-      MaterialPageRoute(
-        builder: (_) => const CameraPage(),
-      ),
+      MaterialPageRoute(builder: (_) => const CameraPage()),
     );
 
     return imagePath;

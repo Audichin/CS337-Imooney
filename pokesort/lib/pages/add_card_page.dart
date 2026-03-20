@@ -66,10 +66,9 @@ class _AddCardPageState extends State<AddCardPage> {
         border: const OutlineInputBorder(),
       ),
       items: values
-          .map((v) => DropdownMenuItem<T>(
-                value: v,
-                child: Text(labelBuilder(v)),
-              ))
+          .map(
+            (v) => DropdownMenuItem<T>(value: v, child: Text(labelBuilder(v))),
+          )
           .toList(),
       onChanged: onChanged,
     );
@@ -278,8 +277,9 @@ class _AddCardPageState extends State<AddCardPage> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _priceController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Price',
                         border: OutlineInputBorder(),

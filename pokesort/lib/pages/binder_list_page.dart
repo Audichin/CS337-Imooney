@@ -12,6 +12,8 @@ import '../widgets/app_menu_sheet.dart';
 
 import '../search/app_search.dart';
 
+import 'help_hub_page.dart';
+
 class BinderListPage extends StatefulWidget {
   final AppSettings settings;
 
@@ -24,14 +26,22 @@ class BinderListPage extends StatefulWidget {
 class _BinderListPageState extends State<BinderListPage> {
   late Future<List<Binder>> _bindersFuture;
 
-  Future<void> _openBinderSearch() async {
+  void _openHelpHub() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const HelpHubPage()),
+    );
+  }
+
+  Future<void> _openCollectionSearch() async {
     final binders = await BinderDatabase.instance.getBinders();
+    final cards = await BinderDatabase.instance.getAllCards();
 
     if (!mounted) return;
 
     await showSearch(
       context: context,
-      delegate: BinderSearchDelegate(binders: binders),
+      delegate: CollectionSearchDelegate(binders: binders, cards: cards),
     );
   }
 
@@ -175,7 +185,16 @@ class _BinderListPageState extends State<BinderListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Binders')),
+      appBar: AppBar(
+        title: const Text('My Binders'),
+        actions: [
+          IconButton(
+            tooltip: 'Help',
+            onPressed: _openHelpHub,
+            icon: const Icon(Icons.help_outline),
+          ),
+        ],
+      ),
       body: FutureBuilder<List<Binder>>(
         future: _bindersFuture,
         builder: (context, snapshot) {
@@ -203,13 +222,19 @@ class _BinderListPageState extends State<BinderListPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           FloatingActionButton.small(
+            heroTag: 'binder_list_menu_fab',
+            onPressed: _openMenu,
+            child: const Icon(Icons.settings),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.small(
             heroTag: 'binder_list_search_fab',
-            onPressed: _openBinderSearch,
+            onPressed: _openCollectionSearch,
             child: const Icon(Icons.search),
           ),
           const SizedBox(height: 12),
           FloatingActionButton(
-            heroTag: 'binder_list_fab',
+            heroTag: 'binder_list_add_fab',
             onPressed: _createBinder,
             child: const Icon(Icons.add),
           ),

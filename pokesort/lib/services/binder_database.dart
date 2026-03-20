@@ -10,6 +10,13 @@ class BinderDatabase {
 
   BinderDatabase._init();
 
+  Future<List<CardModel>> getAllCards() async {
+    final db = await database;
+    final maps = await db.query('cards', orderBy: 'name COLLATE NOCASE ASC');
+
+    return maps.map((map) => CardModel.fromMap(map)).toList();
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('binder.db');

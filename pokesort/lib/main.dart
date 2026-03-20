@@ -10,10 +10,7 @@ void main() {
 class PokeSortApp extends StatelessWidget {
   final AppSettings settings;
 
-  const PokeSortApp({
-    super.key,
-    required this.settings,
-  });
+  const PokeSortApp({super.key, required this.settings});
 
   @override
   Widget build(BuildContext context) {

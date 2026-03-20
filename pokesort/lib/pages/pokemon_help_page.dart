@@ -14,26 +14,20 @@ class PokemonHelpPage extends StatelessWidget {
   Widget _sectionTitle(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
+      child: Text(text, style: Theme.of(context).textTheme.titleMedium),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pokémon Help'),
-      ),
+      appBar: AppBar(title: const Text('Pokémon Help')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
             _sectionTitle(context, 'Card Metadata Help'),
-            const Text(
-              '''
+            const Text('''
 Need help understanding your card?
 Below are locations for where to find 
 each bit of required data to create a new card:
@@ -43,8 +37,7 @@ Type: Top Right of card, with symbol
 Stage: Top left of card, left of name
 Rarity: Bottom left of card, right of (###/###)
 Variant
-''',
-            ),
+'''),
             _sectionTitle(context, 'Useful Links'),
             ListTile(
               leading: const Icon(Icons.link),
@@ -56,13 +49,17 @@ Variant
               leading: const Icon(Icons.link),
               title: const Text('Checking pokemon card rarity'),
               subtitle: const Text('Pokémon rarity system'),
-              onTap: () => _openLink('https://www.tcgplayer.com/content/article/How-to-Tell-the-Rarity-of-a-Pok%C3%A9mon-Card/3bc6c211-f4ce-4c4d-b823-74f3790ebaeb/'),
+              onTap: () => _openLink(
+                'https://www.tcgplayer.com/content/article/How-to-Tell-the-Rarity-of-a-Pok%C3%A9mon-Card/3bc6c211-f4ce-4c4d-b823-74f3790ebaeb/',
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.link),
               title: const Text('Is your card a legendary?'),
               subtitle: const Text('All legendary & mythical pokemon'),
-              onTap: () => _openLink('https://www.wargamer.com/pokemon-trading-card-game/legendary-pokemon'),
+              onTap: () => _openLink(
+                'https://www.wargamer.com/pokemon-trading-card-game/legendary-pokemon',
+              ),
             ),
           ],
         ),

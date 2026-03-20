@@ -16,11 +16,7 @@ String cardTypeToString(CardType type) {
   return type.name[0].toUpperCase() + type.name.substring(1);
 }
 
-enum CardStage {
-  basic,
-  stage1,
-  stage2,
-}
+enum CardStage { basic, stage1, stage2 }
 
 String stageToString(CardStage stage) {
   switch (stage) {

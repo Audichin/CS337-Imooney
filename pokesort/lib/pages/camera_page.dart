@@ -22,10 +22,7 @@ class _CameraPageState extends State<CameraPage> {
   Future<void> _initializeCamera() async {
     cameras = await availableCameras();
 
-    final controller = CameraController(
-      cameras.first,
-      ResolutionPreset.medium,
-    );
+    final controller = CameraController(cameras.first, ResolutionPreset.medium);
 
     final initializeFuture = controller.initialize();
 
@@ -66,9 +63,7 @@ class _CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     if (_controller == null || _initializeControllerFuture == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -101,7 +96,10 @@ class _CameraPageState extends State<CameraPage> {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color.fromARGB(255, 0, 0, 0), width: 5),
+                    border: Border.all(
+                      color: const Color.fromARGB(255, 0, 0, 0),
+                      width: 5,
+                    ),
                     color: const Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),

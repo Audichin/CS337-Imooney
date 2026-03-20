@@ -8,10 +8,18 @@ import '../models/card_model.dart';
 import '../pages/binder_page.dart';
 import '../pages/card_detail_page.dart';
 
-class BinderSearchDelegate extends SearchDelegate<void> {
+class CollectionSearchDelegate extends SearchDelegate<void> {
   final List<Binder> binders;
+  final List<CardModel> cards;
 
-  BinderSearchDelegate({required this.binders});
+  CollectionSearchDelegate({required this.binders, required this.cards});
+
+  Map<int, Binder> get _binderById {
+    return {
+      for (final binder in binders)
+        if (binder.id != null) binder.id!: binder,
+    };
+  }
 
   List<Binder> _filteredBinders() {
     final q = query.trim().toLowerCase();
@@ -23,8 +31,30 @@ class BinderSearchDelegate extends SearchDelegate<void> {
     }).toList();
   }
 
+  List<CardModel> _filteredCards() {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return cards;
+
+    return cards.where((card) {
+      final binderName = _binderById[card.binderId]?.name.toLowerCase() ?? '';
+
+      return card.name.toLowerCase().contains(q) ||
+          binderName.contains(q) ||
+          languageToString(card.cardLanguage).toLowerCase().contains(q) ||
+          cardTypeToString(card.type).toLowerCase().contains(q) ||
+          stageToString(card.stage).toLowerCase().contains(q) ||
+          rarityToString(card.rarity).toLowerCase().contains(q) ||
+          variantToString(card.variant).toLowerCase().contains(q) ||
+          (card.legendary ? 'legendary' : '').contains(q) ||
+          (card.forSale ? 'for sale' : 'not for sale').contains(q) ||
+          card.pageNumber.toString() == q ||
+          card.row.toString() == q ||
+          card.column.toString() == q;
+    }).toList();
+  }
+
   @override
-  String get searchFieldLabel => 'Search binders';
+  String get searchFieldLabel => 'Search binders and cards';
 
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -50,35 +80,84 @@ class BinderSearchDelegate extends SearchDelegate<void> {
 
   @override
   Widget buildResults(BuildContext context) {
-    final results = _filteredBinders();
+    final binderResults = _filteredBinders();
+    final cardResults = _filteredCards();
 
-    if (results.isEmpty) {
-      return const Center(child: Text('No binders found.'));
+    if (binderResults.isEmpty && cardResults.isEmpty) {
+      return const Center(child: Text('No binders or cards found.'));
     }
 
-    return ListView.separated(
-      itemCount: results.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final binder = results[index];
-
-        return ListTile(
-          leading: binder.coverImage == null
-              ? const CircleAvatar(child: Icon(Icons.book))
-              : CircleAvatar(
-                  backgroundImage: FileImage(File(binder.coverImage!)),
-                ),
-          title: Text(binder.name),
-          subtitle: Text('${binder.pageCount} page(s)'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => BinderPage(binder: binder)),
+    return ListView(
+      children: [
+        if (binderResults.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              'Binders',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...binderResults.map((binder) {
+            return ListTile(
+              leading: binder.coverImage == null
+                  ? const CircleAvatar(child: Icon(Icons.book))
+                  : CircleAvatar(
+                      backgroundImage: FileImage(File(binder.coverImage!)),
+                    ),
+              title: Text(binder.name),
+              subtitle: Text('${binder.pageCount} page(s)'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BinderPage(binder: binder)),
+                );
+              },
             );
-          },
-        );
-      },
+          }),
+        ],
+        if (cardResults.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              'Cards',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...cardResults.map((card) {
+            final binderName =
+                _binderById[card.binderId]?.name ?? 'Unknown Binder';
+
+            return ListTile(
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.file(
+                  File(card.imagePath),
+                  width: 48,
+                  height: 64,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox(
+                    width: 48,
+                    height: 64,
+                    child: Icon(Icons.image_not_supported),
+                  ),
+                ),
+              ),
+              title: Text(card.name),
+              subtitle: Text(
+                '$binderName • Pg ${card.pageNumber} • ${rarityToString(card.rarity)}',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CardDetailPage(card: card)),
+                );
+              },
+            );
+          }),
+        ],
+      ],
     );
   }
 

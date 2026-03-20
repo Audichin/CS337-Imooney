@@ -7,10 +7,7 @@ import '../services/app_settings.dart';
 class AppMenuSheet extends StatelessWidget {
   final AppSettings settings;
 
-  const AppMenuSheet({
-    super.key,
-    required this.settings,
-  });
+  const AppMenuSheet({super.key, required this.settings});
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +35,7 @@ class AppMenuSheet extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const HelpPage(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const HelpPage()),
                 );
               },
             ),
@@ -51,9 +46,7 @@ class AppMenuSheet extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const PokemonHelpPage(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const PokemonHelpPage()),
                 );
               },
             ),

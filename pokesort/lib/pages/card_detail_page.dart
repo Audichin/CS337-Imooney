@@ -8,10 +8,7 @@ import '../models/card_model.dart';
 class CardDetailPage extends StatelessWidget {
   final CardModel card;
 
-  const CardDetailPage({
-    super.key,
-    required this.card,
-  });
+  const CardDetailPage({super.key, required this.card});
 
   Widget _detailRow(BuildContext context, String label, String value) {
     return Padding(
@@ -26,9 +23,7 @@ class CardDetailPage extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -37,9 +32,7 @@ class CardDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(card.name),
-      ),
+      appBar: AppBar(title: Text(card.name)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -60,7 +53,7 @@ class CardDetailPage extends StatelessWidget {
           Text(
             card.name,
             style: Theme.of(context).textTheme.headlineSmall,
-            
+
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -69,16 +62,8 @@ class CardDetailPage extends StatelessWidget {
           _detailRow(context, 'Stage', stageToString(card.stage)),
           _detailRow(context, 'Rarity', rarityToString(card.rarity)),
           _detailRow(context, 'Variant', variantToString(card.variant)),
-          _detailRow(
-            context,
-            'Legendary',
-            card.legendary ? 'Yes' : 'No',
-          ),
-          _detailRow(
-            context,
-            'For Sale',
-            card.forSale ? 'Yes' : 'No',
-          ),
+          _detailRow(context, 'Legendary', card.legendary ? 'Yes' : 'No'),
+          _detailRow(context, 'For Sale', card.forSale ? 'Yes' : 'No'),
           _detailRow(
             context,
             'Price',
