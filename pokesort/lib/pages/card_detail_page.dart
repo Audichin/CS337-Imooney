@@ -48,7 +48,7 @@ class CardDetailPage extends StatelessWidget {
             child: Image.file(
               File(card.imagePath),
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 height: 300,
                 alignment: Alignment.center,
                 color: Colors.grey.shade200,

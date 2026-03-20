@@ -11,6 +11,8 @@ import 'add_card_page.dart';
 
 import 'card_detail_page.dart';
 
+import '../search/app_search.dart';
+
 class BinderPage extends StatefulWidget {
   final Binder binder;
 
@@ -24,6 +26,19 @@ class _BinderPageState extends State<BinderPage> {
   late Future<List<CardModel>> _cardsFuture;
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
+
+  Future<void> _openCardSearch() async {
+    final cards = await BinderDatabase.instance.getCardsByBinder(
+      widget.binder.id!,
+    );
+
+    if (!mounted) return;
+
+    await showSearch(
+      context: context,
+      delegate: CardSearchDelegate(binder: widget.binder, cards: cards),
+    );
+  }
 
   void _openCardDetails(CardModel card) {
     Navigator.push(
@@ -219,6 +234,12 @@ class _BinderPageState extends State<BinderPage> {
                     onPressed: _addCard,
                     icon: const Icon(Icons.add),
                     label: const Text('Add Card'),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    color: Colors.white,
+                    onPressed: _openCardSearch,
+                    icon: const Icon(Icons.search),
                   ),
                   const Spacer(),
                   SizedBox(
