@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../pages/help_page.dart';
-import '../pages/pokemon_help_page.dart';
 import '../services/app_settings.dart';
 
 class AppMenuSheet extends StatelessWidget {
@@ -27,28 +25,6 @@ class AppMenuSheet extends StatelessWidget {
                   settings.setDarkMode(value);
                 },
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.help_outline),
-              title: const Text('How to Use PokeSort'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HelpPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.catching_pokemon),
-              title: const Text('Pokémon Help'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PokemonHelpPage()),
-                );
-              },
             ),
           ],
         ),
