@@ -75,6 +75,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
     return IconButton(
       onPressed: () => close(context, null),
       icon: const Icon(Icons.arrow_back),
+      color: Colors.black,
     );
   }
 

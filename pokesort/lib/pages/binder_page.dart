@@ -236,10 +236,16 @@ class _BinderPageState extends State<BinderPage> {
                     label: const Text('Add Card'),
                   ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    color: Colors.white,
+                  FilledButton(
                     onPressed: _openCardSearch,
-                    icon: const Icon(Icons.search),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(48, 40),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                    ),
+                    child: const Icon(Icons.search),
                   ),
                   const Spacer(),
                   SizedBox(
