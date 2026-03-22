@@ -6,31 +6,46 @@ class CardModel {
   final String name;
   final String imagePath;
 
+  final CardCategory category;
   final CardLanguage cardLanguage;
-  final CardType type;
-  final CardStage stage;
   final CardRarity rarity;
-  final CardVariant variant;
 
-  final bool legendary;
+  final CardType? type;
+  final CardStage? stage;
+
+  final PokemonVariant? pokemonVariant;
+  final String? customPokemonVariant;
+
+  final TrainerVariant? trainerVariant;
+
+  final ItemStadiumKind? itemStadiumKind;
+  final ItemStadiumVariant? itemStadiumVariant;
+
+  final bool? legendary;
+
   final bool forSale;
   final double? price;
 
-  final int pageNumber; // 1-based
-  final int row; // 1-3
-  final int column; // 1-3
+  final int pageNumber;
+  final int row;
+  final int column;
 
   CardModel({
     this.id,
     required this.binderId,
     required this.name,
     required this.imagePath,
+    required this.category,
     required this.cardLanguage,
-    required this.type,
-    required this.stage,
     required this.rarity,
-    required this.variant,
-    required this.legendary,
+    this.type,
+    this.stage,
+    this.pokemonVariant,
+    this.customPokemonVariant,
+    this.trainerVariant,
+    this.itemStadiumKind,
+    this.itemStadiumVariant,
+    this.legendary,
     required this.forSale,
     this.price,
     required this.pageNumber,
@@ -44,12 +59,17 @@ class CardModel {
       'binderId': binderId,
       'name': name,
       'imagePath': imagePath,
+      'category': category.index,
       'cardLanguage': cardLanguage.index,
-      'type': type.index,
-      'stage': stage.index,
       'rarity': rarity.index,
-      'variant': variant.index,
-      'legendary': legendary ? 1 : 0,
+      'type': type?.index,
+      'stage': stage?.index,
+      'pokemonVariant': pokemonVariant?.index,
+      'customPokemonVariant': customPokemonVariant,
+      'trainerVariant': trainerVariant?.index,
+      'itemStadiumKind': itemStadiumKind?.index,
+      'itemStadiumVariant': itemStadiumVariant?.index,
+      'legendary': legendary == null ? null : (legendary! ? 1 : 0),
       'forSale': forSale ? 1 : 0,
       'price': price,
       'pageNumber': pageNumber,
@@ -64,12 +84,29 @@ class CardModel {
       binderId: map['binderId'] as int,
       name: map['name'] as String,
       imagePath: map['imagePath'] as String,
+      category: CardCategory.values[map['category'] as int],
       cardLanguage: CardLanguage.values[map['cardLanguage'] as int],
-      type: CardType.values[map['type'] as int],
-      stage: CardStage.values[map['stage'] as int],
       rarity: CardRarity.values[map['rarity'] as int],
-      variant: CardVariant.values[map['variant'] as int],
-      legendary: (map['legendary'] as int) == 1,
+      type: map['type'] == null ? null : CardType.values[map['type'] as int],
+      stage: map['stage'] == null
+          ? null
+          : CardStage.values[map['stage'] as int],
+      pokemonVariant: map['pokemonVariant'] == null
+          ? null
+          : PokemonVariant.values[map['pokemonVariant'] as int],
+      customPokemonVariant: map['customPokemonVariant'] as String?,
+      trainerVariant: map['trainerVariant'] == null
+          ? null
+          : TrainerVariant.values[map['trainerVariant'] as int],
+      itemStadiumKind: map['itemStadiumKind'] == null
+          ? null
+          : ItemStadiumKind.values[map['itemStadiumKind'] as int],
+      itemStadiumVariant: map['itemStadiumVariant'] == null
+          ? null
+          : ItemStadiumVariant.values[map['itemStadiumVariant'] as int],
+      legendary: map['legendary'] == null
+          ? null
+          : (map['legendary'] as int) == 1,
       forSale: (map['forSale'] as int) == 1,
       price: map['price'] == null ? null : (map['price'] as num).toDouble(),
       pageNumber: map['pageNumber'] as int,

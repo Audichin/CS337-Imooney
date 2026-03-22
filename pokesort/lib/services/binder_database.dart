@@ -10,13 +10,6 @@ class BinderDatabase {
 
   BinderDatabase._init();
 
-  Future<List<CardModel>> getAllCards() async {
-    final db = await database;
-    final maps = await db.query('cards', orderBy: 'name COLLATE NOCASE ASC');
-
-    return maps.map((map) => CardModel.fromMap(map)).toList();
-  }
-
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('binder.db');
@@ -29,7 +22,7 @@ class BinderDatabase {
 
     return openDatabase(
       path,
-      version: 3,
+      version: 5,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -51,12 +44,17 @@ class BinderDatabase {
         binderId INTEGER NOT NULL,
         name TEXT NOT NULL,
         imagePath TEXT NOT NULL,
+        category INTEGER NOT NULL,
         cardLanguage INTEGER NOT NULL,
-        type INTEGER NOT NULL,
-        stage INTEGER NOT NULL,
         rarity INTEGER NOT NULL,
-        variant INTEGER NOT NULL,
-        legendary INTEGER NOT NULL,
+        type INTEGER,
+        stage INTEGER,
+        pokemonVariant INTEGER,
+        customPokemonVariant TEXT,
+        trainerVariant INTEGER,
+        itemStadiumKind INTEGER,
+        itemStadiumVariant INTEGER,
+        legendary INTEGER,
         forSale INTEGER NOT NULL,
         price REAL,
         pageNumber INTEGER NOT NULL,
@@ -69,7 +67,7 @@ class BinderDatabase {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
+    if (oldVersion < 5) {
       await db.execute('DROP TABLE IF EXISTS cards');
       await db.execute('DROP TABLE IF EXISTS binders');
       await _createDB(db, newVersion);
@@ -104,6 +102,13 @@ class BinderDatabase {
       whereArgs: [binderId],
       orderBy: 'pageNumber ASC, row ASC, column ASC',
     );
+
+    return maps.map((map) => CardModel.fromMap(map)).toList();
+  }
+
+  Future<List<CardModel>> getAllCards() async {
+    final db = await database;
+    final maps = await db.query('cards', orderBy: 'name COLLATE NOCASE ASC');
 
     return maps.map((map) => CardModel.fromMap(map)).toList();
   }

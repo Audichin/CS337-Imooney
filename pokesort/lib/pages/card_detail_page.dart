@@ -17,7 +17,7 @@ class CardDetailPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 130,
             child: Text(
               '$label:',
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -27,6 +27,57 @@ class CardDetailPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildCategoryFields(BuildContext context) {
+    switch (card.category) {
+      case CardCategory.pokemon:
+        final variantLabel =
+            card.pokemonVariant == PokemonVariant.notInList &&
+                card.customPokemonVariant != null &&
+                card.customPokemonVariant!.isNotEmpty
+            ? card.customPokemonVariant!
+            : pokemonVariantToString(card.pokemonVariant!);
+
+        return [
+          _detailRow(context, 'Type', cardTypeToString(card.type!)),
+          _detailRow(context, 'Stage', stageToString(card.stage!)),
+          _detailRow(context, 'Variant', variantLabel),
+          _detailRow(
+            context,
+            'Legendary',
+            (card.legendary ?? false) ? 'Yes' : 'No',
+          ),
+        ];
+
+      case CardCategory.trainer:
+        return [
+          _detailRow(
+            context,
+            'Variant',
+            trainerVariantToString(card.trainerVariant!),
+          ),
+        ];
+
+      case CardCategory.itemOrStadium:
+        return [
+          _detailRow(
+            context,
+            'Kind',
+            itemStadiumKindToString(card.itemStadiumKind!),
+          ),
+          if (card.itemStadiumKind == ItemStadiumKind.item &&
+              card.itemStadiumVariant != null)
+            _detailRow(
+              context,
+              'Variant',
+              itemStadiumVariantToString(card.itemStadiumVariant!),
+            ),
+        ];
+
+      case CardCategory.energy:
+        return [_detailRow(context, 'Type', cardTypeToString(card.type!))];
+    }
   }
 
   @override
@@ -41,7 +92,7 @@ class CardDetailPage extends StatelessWidget {
             child: Image.file(
               File(card.imagePath),
               fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => Container(
+              errorBuilder: (_, __, ___) => Container(
                 height: 300,
                 alignment: Alignment.center,
                 color: Colors.grey.shade200,
@@ -50,19 +101,12 @@ class CardDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            card.name,
-            style: Theme.of(context).textTheme.headlineSmall,
-
-            textAlign: TextAlign.center,
-          ),
+          Text(card.name, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
+          _detailRow(context, 'Category', cardCategoryToString(card.category)),
           _detailRow(context, 'Language', languageToString(card.cardLanguage)),
-          _detailRow(context, 'Type', cardTypeToString(card.type)),
-          _detailRow(context, 'Stage', stageToString(card.stage)),
           _detailRow(context, 'Rarity', rarityToString(card.rarity)),
-          _detailRow(context, 'Variant', variantToString(card.variant)),
-          _detailRow(context, 'Legendary', card.legendary ? 'Yes' : 'No'),
+          ..._buildCategoryFields(context),
           _detailRow(context, 'For Sale', card.forSale ? 'Yes' : 'No'),
           _detailRow(
             context,

@@ -8,6 +8,35 @@ import '../models/card_model.dart';
 import '../pages/binder_page.dart';
 import '../pages/card_detail_page.dart';
 
+String _cardVariantLabel(CardModel card) {
+  switch (card.category) {
+    case CardCategory.pokemon:
+      if (card.pokemonVariant == PokemonVariant.notInList &&
+          card.customPokemonVariant != null &&
+          card.customPokemonVariant!.isNotEmpty) {
+        return card.customPokemonVariant!;
+      }
+      return card.pokemonVariant == null
+          ? ''
+          : pokemonVariantToString(card.pokemonVariant!);
+
+    case CardCategory.trainer:
+      return card.trainerVariant == null
+          ? ''
+          : trainerVariantToString(card.trainerVariant!);
+
+    case CardCategory.itemOrStadium:
+      if (card.itemStadiumKind == ItemStadiumKind.item &&
+          card.itemStadiumVariant != null) {
+        return itemStadiumVariantToString(card.itemStadiumVariant!);
+      }
+      return '';
+
+    case CardCategory.energy:
+      return '';
+  }
+}
+
 class CollectionSearchDelegate extends SearchDelegate<void> {
   final List<Binder> binders;
   final List<CardModel> cards;
@@ -37,15 +66,27 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
 
     return cards.where((card) {
       final binderName = _binderById[card.binderId]?.name.toLowerCase() ?? '';
+      final variantText = _cardVariantLabel(card).toLowerCase();
+      final typeText = card.type == null
+          ? ''
+          : cardTypeToString(card.type!).toLowerCase();
+      final stageText = card.stage == null
+          ? ''
+          : stageToString(card.stage!).toLowerCase();
+      final kindText = card.itemStadiumKind == null
+          ? ''
+          : itemStadiumKindToString(card.itemStadiumKind!).toLowerCase();
 
       return card.name.toLowerCase().contains(q) ||
           binderName.contains(q) ||
+          cardCategoryToString(card.category).toLowerCase().contains(q) ||
           languageToString(card.cardLanguage).toLowerCase().contains(q) ||
-          cardTypeToString(card.type).toLowerCase().contains(q) ||
-          stageToString(card.stage).toLowerCase().contains(q) ||
           rarityToString(card.rarity).toLowerCase().contains(q) ||
-          variantToString(card.variant).toLowerCase().contains(q) ||
-          (card.legendary ? 'legendary' : '').contains(q) ||
+          typeText.contains(q) ||
+          stageText.contains(q) ||
+          variantText.contains(q) ||
+          kindText.contains(q) ||
+          ((card.legendary ?? false) ? 'legendary' : '').contains(q) ||
           (card.forSale ? 'for sale' : 'not for sale').contains(q) ||
           card.pageNumber.toString() == q ||
           card.row.toString() == q ||
@@ -75,7 +116,6 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
     return IconButton(
       onPressed: () => close(context, null),
       icon: const Icon(Icons.arrow_back),
-      color: Colors.black,
     );
   }
 
@@ -128,6 +168,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
           ...cardResults.map((card) {
             final binderName =
                 _binderById[card.binderId]?.name ?? 'Unknown Binder';
+            final variantLabel = _cardVariantLabel(card);
 
             return ListTile(
               leading: ClipRRect(
@@ -146,7 +187,9 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
               ),
               title: Text(card.name),
               subtitle: Text(
-                '$binderName • Pg ${card.pageNumber} • ${rarityToString(card.rarity)}',
+                variantLabel.isEmpty
+                    ? '$binderName • Pg ${card.pageNumber} • ${rarityToString(card.rarity)}'
+                    : '$binderName • Pg ${card.pageNumber} • ${rarityToString(card.rarity)} • $variantLabel',
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
@@ -179,13 +222,26 @@ class CardSearchDelegate extends SearchDelegate<void> {
     if (q.isEmpty) return cards;
 
     return cards.where((card) {
+      final variantText = _cardVariantLabel(card).toLowerCase();
+      final typeText = card.type == null
+          ? ''
+          : cardTypeToString(card.type!).toLowerCase();
+      final stageText = card.stage == null
+          ? ''
+          : stageToString(card.stage!).toLowerCase();
+      final kindText = card.itemStadiumKind == null
+          ? ''
+          : itemStadiumKindToString(card.itemStadiumKind!).toLowerCase();
+
       return card.name.toLowerCase().contains(q) ||
+          cardCategoryToString(card.category).toLowerCase().contains(q) ||
           languageToString(card.cardLanguage).toLowerCase().contains(q) ||
-          cardTypeToString(card.type).toLowerCase().contains(q) ||
-          stageToString(card.stage).toLowerCase().contains(q) ||
           rarityToString(card.rarity).toLowerCase().contains(q) ||
-          variantToString(card.variant).toLowerCase().contains(q) ||
-          (card.legendary ? 'legendary' : '').contains(q) ||
+          typeText.contains(q) ||
+          stageText.contains(q) ||
+          variantText.contains(q) ||
+          kindText.contains(q) ||
+          ((card.legendary ?? false) ? 'legendary' : '').contains(q) ||
           (card.forSale ? 'for sale' : 'not for sale').contains(q) ||
           card.pageNumber.toString() == q ||
           card.row.toString() == q ||
@@ -231,6 +287,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final card = results[index];
+        final variantLabel = _cardVariantLabel(card);
 
         return ListTile(
           leading: ClipRRect(
@@ -249,7 +306,9 @@ class CardSearchDelegate extends SearchDelegate<void> {
           ),
           title: Text(card.name),
           subtitle: Text(
-            'Pg ${card.pageNumber} • ${rarityToString(card.rarity)} • ${variantToString(card.variant)}',
+            variantLabel.isEmpty
+                ? 'Pg ${card.pageNumber} • ${rarityToString(card.rarity)}'
+                : 'Pg ${card.pageNumber} • ${rarityToString(card.rarity)} • $variantLabel',
           ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {

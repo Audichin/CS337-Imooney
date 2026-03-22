@@ -1,3 +1,18 @@
+enum CardCategory { pokemon, trainer, itemOrStadium, energy }
+
+String cardCategoryToString(CardCategory category) {
+  switch (category) {
+    case CardCategory.pokemon:
+      return 'Pokémon';
+    case CardCategory.trainer:
+      return 'Trainer';
+    case CardCategory.itemOrStadium:
+      return 'Item/Stadium';
+    case CardCategory.energy:
+      return 'Energy';
+  }
+}
+
 enum CardType {
   grass,
   fire,
@@ -67,7 +82,7 @@ String rarityToString(CardRarity rarity) {
   }
 }
 
-enum CardVariant {
+enum PokemonVariant {
   amazingRare,
   breakCard,
   dark,
@@ -90,48 +105,81 @@ enum CardVariant {
   notInList,
 }
 
-String variantToString(CardVariant variant) {
+String pokemonVariantToString(PokemonVariant variant) {
   switch (variant) {
-    case CardVariant.amazingRare:
+    case PokemonVariant.amazingRare:
       return 'Amazing Rare';
-    case CardVariant.breakCard:
+    case PokemonVariant.breakCard:
       return 'BREAK';
-    case CardVariant.dark:
+    case PokemonVariant.dark:
       return 'Dark';
-    case CardVariant.defaultVariant:
-      return 'None';
-    case CardVariant.deltaSpecies:
+    case PokemonVariant.defaultVariant:
+      return 'Default';
+    case PokemonVariant.deltaSpecies:
       return 'Delta Species';
-    case CardVariant.ex:
+    case PokemonVariant.ex:
       return 'EX';
-    case CardVariant.gx:
+    case PokemonVariant.gx:
       return 'GX';
-    case CardVariant.legend:
+    case PokemonVariant.legend:
       return 'LEGEND';
-    case CardVariant.lvX:
+    case PokemonVariant.lvX:
       return 'LV.X';
-    case CardVariant.light:
+    case PokemonVariant.light:
       return 'Light';
-    case CardVariant.megaEx:
+    case PokemonVariant.megaEx:
       return 'Mega (M EX)';
-    case CardVariant.prime:
+    case PokemonVariant.prime:
       return 'Prime';
-    case CardVariant.radiant:
+    case PokemonVariant.radiant:
       return 'Radiant';
-    case CardVariant.shining:
+    case PokemonVariant.shining:
       return 'Shining';
-    case CardVariant.tagTeamGx:
+    case PokemonVariant.tagTeamGx:
       return 'Tag Team GX';
-    case CardVariant.trainerPokemon:
+    case PokemonVariant.trainerPokemon:
       return 'Trainer Pokémon';
-    case CardVariant.v:
+    case PokemonVariant.v:
       return 'V';
-    case CardVariant.vmax:
+    case PokemonVariant.vmax:
       return 'VMAX';
-    case CardVariant.vstar:
+    case PokemonVariant.vstar:
       return 'VSTAR';
-    case CardVariant.notInList:
-      return 'Unknown Variant';
+    case PokemonVariant.notInList:
+      return 'Not in list';
+  }
+}
+
+enum TrainerVariant { normal, tagTeam }
+
+String trainerVariantToString(TrainerVariant variant) {
+  switch (variant) {
+    case TrainerVariant.normal:
+      return 'Normal';
+    case TrainerVariant.tagTeam:
+      return 'Tag Team';
+  }
+}
+
+enum ItemStadiumKind { item, stadium }
+
+String itemStadiumKindToString(ItemStadiumKind kind) {
+  switch (kind) {
+    case ItemStadiumKind.item:
+      return 'Item';
+    case ItemStadiumKind.stadium:
+      return 'Stadium';
+  }
+}
+
+enum ItemStadiumVariant { normal, aceSpec }
+
+String itemStadiumVariantToString(ItemStadiumVariant variant) {
+  switch (variant) {
+    case ItemStadiumVariant.normal:
+      return 'Normal';
+    case ItemStadiumVariant.aceSpec:
+      return 'Ace Spec';
   }
 }
 

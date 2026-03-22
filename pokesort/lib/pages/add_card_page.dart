@@ -27,16 +27,23 @@ class _AddCardPageState extends State<AddCardPage> {
 
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
-
   final _pageController = TextEditingController(text: '1');
   final _rowController = TextEditingController(text: '1');
   final _columnController = TextEditingController(text: '1');
+  final _customPokemonVariantController = TextEditingController();
 
+  CardCategory _selectedCategory = CardCategory.pokemon;
   CardLanguage _selectedLanguage = CardLanguage.english;
+  CardRarity _selectedRarity = CardRarity.common;
+
   CardType _selectedType = CardType.grass;
   CardStage _selectedStage = CardStage.basic;
-  CardRarity _selectedRarity = CardRarity.common;
-  CardVariant _selectedVariant = CardVariant.defaultVariant;
+  PokemonVariant _selectedPokemonVariant = PokemonVariant.defaultVariant;
+
+  TrainerVariant _selectedTrainerVariant = TrainerVariant.normal;
+
+  ItemStadiumKind _selectedItemStadiumKind = ItemStadiumKind.item;
+  ItemStadiumVariant _selectedItemStadiumVariant = ItemStadiumVariant.normal;
 
   bool _legendary = false;
   bool _forSale = false;
@@ -49,29 +56,48 @@ class _AddCardPageState extends State<AddCardPage> {
     _pageController.dispose();
     _rowController.dispose();
     _columnController.dispose();
+    _customPokemonVariantController.dispose();
     super.dispose();
   }
 
   DropdownButtonFormField<T> _enumDropdown<T>({
     required String label,
-    required T value,
+    required T initialValue,
     required List<T> values,
     required String Function(T) labelBuilder,
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      initialValue: value,
+      initialValue: initialValue,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
       ),
       items: values
           .map(
-            (v) => DropdownMenuItem<T>(value: v, child: Text(labelBuilder(v))),
+            (item) => DropdownMenuItem<T>(
+              value: item,
+              child: Text(labelBuilder(item)),
+            ),
           )
           .toList(),
       onChanged: onChanged,
     );
+  }
+
+  void _onCategoryChanged(CardCategory newCategory) {
+    setState(() {
+      _selectedCategory = newCategory;
+
+      _selectedType = CardType.grass;
+      _selectedStage = CardStage.basic;
+      _selectedPokemonVariant = PokemonVariant.defaultVariant;
+      _selectedTrainerVariant = TrainerVariant.normal;
+      _selectedItemStadiumKind = ItemStadiumKind.item;
+      _selectedItemStadiumVariant = ItemStadiumVariant.normal;
+      _legendary = false;
+      _customPokemonVariantController.clear();
+    });
   }
 
   Future<void> _save() async {
@@ -83,7 +109,6 @@ class _AddCardPageState extends State<AddCardPage> {
 
     setState(() => _saving = true);
 
-    // Prevent two cards in the same slot
     final slotTaken = await BinderDatabase.instance.cardSlotExists(
       binderId: widget.binderId,
       pageNumber: pageNumber,
@@ -108,12 +133,35 @@ class _AddCardPageState extends State<AddCardPage> {
       binderId: widget.binderId,
       name: _nameController.text.trim(),
       imagePath: widget.imagePath,
+      category: _selectedCategory,
       cardLanguage: _selectedLanguage,
-      type: _selectedType,
-      stage: _selectedStage,
       rarity: _selectedRarity,
-      variant: _selectedVariant,
-      legendary: _legendary,
+      type:
+          (_selectedCategory == CardCategory.pokemon ||
+              _selectedCategory == CardCategory.energy)
+          ? _selectedType
+          : null,
+      stage: _selectedCategory == CardCategory.pokemon ? _selectedStage : null,
+      pokemonVariant: _selectedCategory == CardCategory.pokemon
+          ? _selectedPokemonVariant
+          : null,
+      customPokemonVariant:
+          _selectedCategory == CardCategory.pokemon &&
+              _selectedPokemonVariant == PokemonVariant.notInList
+          ? _customPokemonVariantController.text.trim()
+          : null,
+      trainerVariant: _selectedCategory == CardCategory.trainer
+          ? _selectedTrainerVariant
+          : null,
+      itemStadiumKind: _selectedCategory == CardCategory.itemOrStadium
+          ? _selectedItemStadiumKind
+          : null,
+      itemStadiumVariant:
+          _selectedCategory == CardCategory.itemOrStadium &&
+              _selectedItemStadiumKind == ItemStadiumKind.item
+          ? _selectedItemStadiumVariant
+          : null,
+      legendary: _selectedCategory == CardCategory.pokemon ? _legendary : null,
       forSale: _forSale,
       price: price,
       pageNumber: pageNumber,
@@ -125,6 +173,157 @@ class _AddCardPageState extends State<AddCardPage> {
 
     if (!mounted) return;
     Navigator.pop(context, true);
+  }
+
+  Widget _buildCategoryChooser() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Card Category', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SegmentedButton<CardCategory>(
+          segments: const [
+            ButtonSegment(value: CardCategory.pokemon, label: Text('Pokémon')),
+            ButtonSegment(value: CardCategory.trainer, label: Text('Trainer')),
+            ButtonSegment(
+              value: CardCategory.itemOrStadium,
+              label: Text('Item/Stadium'),
+            ),
+            ButtonSegment(value: CardCategory.energy, label: Text('Energy')),
+          ],
+          selected: {_selectedCategory},
+          onSelectionChanged: (selection) {
+            _onCategoryChanged(selection.first);
+          },
+          showSelectedIcon: false,
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildConditionalFields() {
+    switch (_selectedCategory) {
+      case CardCategory.pokemon:
+        return [
+          _enumDropdown<CardType>(
+            label: 'Type',
+            initialValue: _selectedType,
+            values: CardType.values,
+            labelBuilder: cardTypeToString,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedType = value);
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+          _enumDropdown<CardStage>(
+            label: 'Stage',
+            initialValue: _selectedStage,
+            values: CardStage.values,
+            labelBuilder: stageToString,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedStage = value);
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+          _enumDropdown<PokemonVariant>(
+            label: 'Variant',
+            initialValue: _selectedPokemonVariant,
+            values: PokemonVariant.values,
+            labelBuilder: pokemonVariantToString,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedPokemonVariant = value);
+              }
+            },
+          ),
+          if (_selectedPokemonVariant == PokemonVariant.notInList) ...[
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _customPokemonVariantController,
+              decoration: const InputDecoration(
+                labelText: 'Custom Variant',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (_selectedPokemonVariant == PokemonVariant.notInList &&
+                    (value == null || value.trim().isEmpty)) {
+                  return 'Enter the custom variant name';
+                }
+                return null;
+              },
+            ),
+          ],
+          const SizedBox(height: 8),
+          SwitchListTile(
+            value: _legendary,
+            onChanged: (value) => setState(() => _legendary = value),
+            title: const Text('Legendary'),
+          ),
+        ];
+
+      case CardCategory.trainer:
+        return [
+          _enumDropdown<TrainerVariant>(
+            label: 'Variant',
+            initialValue: _selectedTrainerVariant,
+            values: TrainerVariant.values,
+            labelBuilder: trainerVariantToString,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedTrainerVariant = value);
+              }
+            },
+          ),
+        ];
+
+      case CardCategory.itemOrStadium:
+        return [
+          _enumDropdown<ItemStadiumKind>(
+            label: 'Item or Stadium',
+            initialValue: _selectedItemStadiumKind,
+            values: ItemStadiumKind.values,
+            labelBuilder: itemStadiumKindToString,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedItemStadiumKind = value);
+              }
+            },
+          ),
+          if (_selectedItemStadiumKind == ItemStadiumKind.item) ...[
+            const SizedBox(height: 16),
+            _enumDropdown<ItemStadiumVariant>(
+              label: 'Variant',
+              initialValue: _selectedItemStadiumVariant,
+              values: ItemStadiumVariant.values,
+              labelBuilder: itemStadiumVariantToString,
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _selectedItemStadiumVariant = value);
+                }
+              },
+            ),
+          ],
+        ];
+
+      case CardCategory.energy:
+        return [
+          _enumDropdown<CardType>(
+            label: 'Type',
+            initialValue: _selectedType,
+            values: CardType.values,
+            labelBuilder: cardTypeToString,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedType = value);
+              }
+            },
+          ),
+        ];
+    }
   }
 
   @override
@@ -148,62 +347,51 @@ class _AddCardPageState extends State<AddCardPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  _buildCategoryChooser(),
+                  const SizedBox(height: 16),
+
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(
                       labelText: 'Card Name',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    validator: (value) =>
+                        (value == null || value.trim().isEmpty)
+                        ? 'Required'
+                        : null,
                   ),
-
                   const SizedBox(height: 16),
+
                   _enumDropdown<CardLanguage>(
                     label: 'Language',
-                    value: _selectedLanguage,
+                    initialValue: _selectedLanguage,
                     values: CardLanguage.values,
                     labelBuilder: languageToString,
-                    onChanged: (v) => setState(() => _selectedLanguage = v!),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedLanguage = value);
+                      }
+                    },
                   ),
-
                   const SizedBox(height: 16),
-                  _enumDropdown<CardType>(
-                    label: 'Type',
-                    value: _selectedType,
-                    values: CardType.values,
-                    labelBuilder: cardTypeToString,
-                    onChanged: (v) => setState(() => _selectedType = v!),
-                  ),
 
-                  const SizedBox(height: 16),
-                  _enumDropdown<CardStage>(
-                    label: 'Stage',
-                    value: _selectedStage,
-                    values: CardStage.values,
-                    labelBuilder: stageToString,
-                    onChanged: (v) => setState(() => _selectedStage = v!),
-                  ),
-
-                  const SizedBox(height: 16),
                   _enumDropdown<CardRarity>(
                     label: 'Rarity',
-                    value: _selectedRarity,
+                    initialValue: _selectedRarity,
                     values: CardRarity.values,
                     labelBuilder: rarityToString,
-                    onChanged: (v) => setState(() => _selectedRarity = v!),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedRarity = value);
+                      }
+                    },
                   ),
-
                   const SizedBox(height: 16),
-                  _enumDropdown<CardVariant>(
-                    label: 'Variant',
-                    value: _selectedVariant,
-                    values: CardVariant.values,
-                    labelBuilder: variantToString,
-                    onChanged: (v) => setState(() => _selectedVariant = v!),
-                  ),
 
+                  ..._buildConditionalFields(),
                   const SizedBox(height: 16),
+
                   TextFormField(
                     controller: _pageController,
                     keyboardType: TextInputType.number,
@@ -211,8 +399,8 @@ class _AddCardPageState extends State<AddCardPage> {
                       labelText: 'Page (1-${widget.binderPageCount})',
                       border: const OutlineInputBorder(),
                     ),
-                    validator: (v) {
-                      final n = int.tryParse(v?.trim() ?? '');
+                    validator: (value) {
+                      final n = int.tryParse(value?.trim() ?? '');
                       if (n == null) return 'Enter a number';
                       if (n < 1 || n > widget.binderPageCount) {
                         return 'Must be 1-${widget.binderPageCount}';
@@ -220,8 +408,8 @@ class _AddCardPageState extends State<AddCardPage> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 16),
+
                   Row(
                     children: [
                       Expanded(
@@ -232,8 +420,8 @@ class _AddCardPageState extends State<AddCardPage> {
                             labelText: 'Row (1-3)',
                             border: OutlineInputBorder(),
                           ),
-                          validator: (v) {
-                            final n = int.tryParse(v?.trim() ?? '');
+                          validator: (value) {
+                            final n = int.tryParse(value?.trim() ?? '');
                             if (n == null) return 'Required';
                             if (n < 1 || n > 3) return '1-3 only';
                             return null;
@@ -249,8 +437,8 @@ class _AddCardPageState extends State<AddCardPage> {
                             labelText: 'Column (1-3)',
                             border: OutlineInputBorder(),
                           ),
-                          validator: (v) {
-                            final n = int.tryParse(v?.trim() ?? '');
+                          validator: (value) {
+                            final n = int.tryParse(value?.trim() ?? '');
                             if (n == null) return 'Required';
                             if (n < 1 || n > 3) return '1-3 only';
                             return null;
@@ -262,14 +450,8 @@ class _AddCardPageState extends State<AddCardPage> {
 
                   const SizedBox(height: 8),
                   SwitchListTile(
-                    value: _legendary,
-                    onChanged: (v) => setState(() => _legendary = v),
-                    title: const Text('Legendary'),
-                  ),
-
-                  SwitchListTile(
                     value: _forSale,
-                    onChanged: (v) => setState(() => _forSale = v),
+                    onChanged: (value) => setState(() => _forSale = value),
                     title: const Text('For Sale'),
                   ),
 
@@ -285,10 +467,12 @@ class _AddCardPageState extends State<AddCardPage> {
                         border: OutlineInputBorder(),
                         prefixText: '\$',
                       ),
-                      validator: (v) {
+                      validator: (value) {
                         if (!_forSale) return null;
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        if (double.tryParse(v.trim()) == null) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        if (double.tryParse(value.trim()) == null) {
                           return 'Invalid number';
                         }
                         return null;

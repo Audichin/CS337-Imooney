@@ -27,6 +27,37 @@ class _BinderPageState extends State<BinderPage> {
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
 
+  String _cardVariantLabel(CardModel card) {
+    switch (card.category) {
+      case CardCategory.pokemon:
+        if (card.pokemonVariant == PokemonVariant.notInList &&
+            card.customPokemonVariant != null &&
+            card.customPokemonVariant!.isNotEmpty) {
+          return card.customPokemonVariant!;
+        }
+        return card.pokemonVariant == null
+            ? ''
+            : pokemonVariantToString(card.pokemonVariant!);
+
+      case CardCategory.trainer:
+        return card.trainerVariant == null
+            ? ''
+            : trainerVariantToString(card.trainerVariant!);
+
+      case CardCategory.itemOrStadium:
+        if (card.itemStadiumKind == ItemStadiumKind.item &&
+            card.itemStadiumVariant != null) {
+          return itemStadiumVariantToString(card.itemStadiumVariant!);
+        }
+        return card.itemStadiumKind == null
+            ? ''
+            : itemStadiumKindToString(card.itemStadiumKind!);
+
+      case CardCategory.energy:
+        return card.type == null ? '' : cardTypeToString(card.type!);
+    }
+  }
+
   Future<void> _openCardSearch() async {
     final cards = await BinderDatabase.instance.getCardsByBinder(
       widget.binder.id!,
@@ -146,7 +177,9 @@ class _BinderPageState extends State<BinderPage> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '${rarityToString(card.rarity)} • ${variantToString(card.variant)}',
+                    _cardVariantLabel(card).isEmpty
+                        ? rarityToString(card.rarity)
+                        : '${rarityToString(card.rarity)} • ${_cardVariantLabel(card)}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
