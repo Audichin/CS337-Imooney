@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 
 import '../models/card_enums.dart';
 import '../models/card_model.dart';
+import '../services/binder_database.dart';
 
 class CardDetailPage extends StatelessWidget {
   final CardModel card;
 
-  const CardDetailPage({super.key, required this.card});
+  const CardDetailPage({
+    super.key,
+    required this.card,
+  });
 
   Widget _detailRow(BuildContext context, String label, String value) {
     return Padding(
@@ -23,26 +27,50 @@ class CardDetailPage extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: Text(value),
+          ),
         ],
       ),
     );
   }
 
+  String _variantLabel() {
+    switch (card.category) {
+      case CardCategory.pokemon:
+        if (card.pokemonVariant == PokemonVariant.notInList &&
+            card.customPokemonVariant != null &&
+            card.customPokemonVariant!.isNotEmpty) {
+          return card.customPokemonVariant!;
+        }
+        return card.pokemonVariant == null
+            ? ''
+            : pokemonVariantToString(card.pokemonVariant!);
+
+      case CardCategory.trainer:
+        return card.trainerVariant == null
+            ? ''
+            : trainerVariantToString(card.trainerVariant!);
+
+      case CardCategory.itemOrStadium:
+        if (card.itemStadiumKind == ItemStadiumKind.item &&
+            card.itemStadiumVariant != null) {
+          return itemStadiumVariantToString(card.itemStadiumVariant!);
+        }
+        return '';
+
+      case CardCategory.energy:
+        return '';
+    }
+  }
+
   List<Widget> _buildCategoryFields(BuildContext context) {
     switch (card.category) {
       case CardCategory.pokemon:
-        final variantLabel =
-            card.pokemonVariant == PokemonVariant.notInList &&
-                card.customPokemonVariant != null &&
-                card.customPokemonVariant!.isNotEmpty
-            ? card.customPokemonVariant!
-            : pokemonVariantToString(card.pokemonVariant!);
-
         return [
           _detailRow(context, 'Type', cardTypeToString(card.type!)),
           _detailRow(context, 'Stage', stageToString(card.stage!)),
-          _detailRow(context, 'Variant', variantLabel),
+          _detailRow(context, 'Variant', _variantLabel()),
           _detailRow(
             context,
             'Legendary',
@@ -76,14 +104,55 @@ class CardDetailPage extends StatelessWidget {
         ];
 
       case CardCategory.energy:
-        return [_detailRow(context, 'Type', cardTypeToString(card.type!))];
+        return [
+          _detailRow(context, 'Type', cardTypeToString(card.type!)),
+        ];
     }
+  }
+
+  Future<void> _deleteCard(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Card'),
+          content: Text('Delete "${card.name}"? This cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+    if (card.id == null) return;
+
+    await BinderDatabase.instance.deleteCard(card.id!);
+
+    if (!context.mounted) return;
+    Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(card.name)),
+      appBar: AppBar(
+        title: Text(card.name),
+        actions: [
+          IconButton(
+            tooltip: 'Delete card',
+            onPressed: () => _deleteCard(context),
+            icon: const Icon(Icons.delete_outline),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -101,7 +170,10 @@ class CardDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text(card.name, style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            card.name,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           const SizedBox(height: 16),
           _detailRow(context, 'Category', cardCategoryToString(card.category)),
           _detailRow(context, 'Language', languageToString(card.cardLanguage)),

@@ -27,6 +27,38 @@ class _BinderPageState extends State<BinderPage> {
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
 
+  Future<void> _deleteBinder() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Binder'),
+          content: Text(
+            'Delete "${widget.binder.name}" and all cards inside it? This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+    if (widget.binder.id == null) return;
+
+    await BinderDatabase.instance.deleteBinder(widget.binder.id!);
+
+    if (!mounted) return;
+    Navigator.pop(context, true);
+  }
+
   String _cardVariantLabel(CardModel card) {
     switch (card.category) {
       case CardCategory.pokemon:
@@ -71,11 +103,15 @@ class _BinderPageState extends State<BinderPage> {
     );
   }
 
-  void _openCardDetails(CardModel card) {
-    Navigator.push(
+  Future<void> _openCardDetails(CardModel card) async {
+    final deleted = await Navigator.push<bool>(
       context,
       MaterialPageRoute(builder: (_) => CardDetailPage(card: card)),
     );
+
+    if (deleted == true) {
+      setState(_loadCards);
+    }
   }
 
   @override
@@ -204,21 +240,15 @@ class _BinderPageState extends State<BinderPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: Column(
-        children: [
-          Expanded(
-            child: GridView.count(
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.68,
-              children: slots,
-            ),
-          ),
-          const SizedBox(height: 92),
-        ],
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 68),
+        crossAxisCount: 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.68,
+        children: slots,
       ),
     );
   }
@@ -313,7 +343,16 @@ class _BinderPageState extends State<BinderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.binder.name)),
+      appBar: AppBar(
+        title: Text(widget.binder.name),
+        actions: [
+          IconButton(
+            tooltip: 'Delete binder',
+            onPressed: _deleteBinder,
+            icon: const Icon(Icons.delete_outline),
+          ),
+        ],
+      ),
       extendBody: true,
       body: FutureBuilder<List<CardModel>>(
         future: _cardsFuture,

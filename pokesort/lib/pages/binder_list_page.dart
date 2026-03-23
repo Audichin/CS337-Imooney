@@ -173,11 +173,15 @@ class _BinderListPageState extends State<BinderListPage> {
       title: Text(binder.name),
       subtitle: Text('${binder.pageCount} page(s)'),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final changed = await Navigator.push<bool>(
           context,
           MaterialPageRoute(builder: (_) => BinderPage(binder: binder)),
         );
+
+        if (changed == true) {
+          setState(_loadBinders);
+        }
       },
     );
   }

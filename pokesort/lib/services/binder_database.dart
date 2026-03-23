@@ -129,4 +129,29 @@ class BinderDatabase {
 
     return maps.isNotEmpty;
   }
+
+Future<int> deleteCard(int cardId) async {
+  final db = await database;
+  return db.delete(
+    'cards',
+    where: 'id = ?',
+    whereArgs: [cardId],
+  );
+}
+
+Future<int> deleteBinder(int binderId) async {
+  final db = await database;
+
+  await db.delete(
+    'cards',
+    where: 'binderId = ?',
+    whereArgs: [binderId],
+  );
+
+  return db.delete(
+    'binders',
+    where: 'id = ?',
+    whereArgs: [binderId],
+  );
+}
 }
