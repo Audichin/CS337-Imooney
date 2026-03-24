@@ -9,10 +9,7 @@ import '../services/binder_database.dart';
 class CardDetailPage extends StatelessWidget {
   final CardModel card;
 
-  const CardDetailPage({
-    super.key,
-    required this.card,
-  });
+  const CardDetailPage({super.key, required this.card});
 
   Widget _detailRow(BuildContext context, String label, String value) {
     return Padding(
@@ -27,9 +24,7 @@ class CardDetailPage extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -104,9 +99,7 @@ class CardDetailPage extends StatelessWidget {
         ];
 
       case CardCategory.energy:
-        return [
-          _detailRow(context, 'Type', cardTypeToString(card.type!)),
-        ];
+        return [_detailRow(context, 'Type', cardTypeToString(card.type!))];
     }
   }
 
@@ -172,7 +165,9 @@ class CardDetailPage extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             card.name,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 30),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontSize: 30),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),

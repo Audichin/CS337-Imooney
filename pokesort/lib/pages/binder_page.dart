@@ -204,10 +204,11 @@ class _BinderPageState extends State<BinderPage> {
             Padding(
               padding: const EdgeInsets.all(6),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     card.name,
+                    textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -216,6 +217,7 @@ class _BinderPageState extends State<BinderPage> {
                     _cardVariantLabel(card).isEmpty
                         ? rarityToString(card.rarity)
                         : '${cardCategoryToString(card.category)} card',
+                    textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
