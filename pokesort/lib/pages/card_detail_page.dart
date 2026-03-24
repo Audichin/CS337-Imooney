@@ -161,7 +161,7 @@ class CardDetailPage extends StatelessWidget {
             child: Image.file(
               File(card.imagePath),
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 height: 300,
                 alignment: Alignment.center,
                 color: Colors.grey.shade200,
@@ -172,7 +172,8 @@ class CardDetailPage extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             card.name,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 30),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           _detailRow(context, 'Category', cardCategoryToString(card.category)),

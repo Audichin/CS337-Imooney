@@ -26,17 +26,27 @@ class PokemonHelpPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            _sectionTitle(context, 'Card Metadata Help'),
+            _sectionTitle(context, 'Need help understanding your card?'),
             const Text('''
-Need help understanding your card?
-Below are locations for where to find 
-each bit of required data to create a new card:
+Locations for all data for adding a card into Pokesort:
 
-Name: Top left of card, in black letters
-Type: Top Right of card, with symbol
-Stage: Top left of card, left of name
-Rarity: Bottom left of card, right of (###/###)
-Variant
+Card cadagories (supported by the app):
+Pokemon card --> will have a pokemon on the front
+Tainer card --> Will say "Trainer" either on the top left or middle
+Item/Stadium card --> Will say "Item" or "Stadium" on top left
+Energy card --> Will say "Energy" on top left or middle
+ACE SPEC --> Will say "ACE SPEC" on left & right of card
+
+NOTICE: If you have an ACE SPEC card, it is labeled under "Item/Stadium", click on "Item" when prompted
+--------------------------------------------------------------------------------------------
+Pokemon card information locations:
+
+Name --> Top left of card, in black letters
+Rarity --> Bottom left of card, right of (###/###)
+Type --> Top Right of card, with symbol
+Stage --> Top left of card, left of name
+Variant --> Middle right of card, right of name, if applicable
+--------------------------------------------------------------------------------------------
 '''),
             _sectionTitle(context, 'Useful Links'),
             ListTile(

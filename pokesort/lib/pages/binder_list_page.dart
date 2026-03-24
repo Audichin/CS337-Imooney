@@ -216,7 +216,7 @@ class _BinderListPageState extends State<BinderListPage> {
 
           return ListView.separated(
             itemCount: binders.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) => _buildBinderTile(binders[index]),
           );
         },

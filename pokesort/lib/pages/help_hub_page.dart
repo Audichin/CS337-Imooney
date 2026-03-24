@@ -16,9 +16,9 @@ class HelpHubPage extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.menu_book),
-              title: const Text('How to Use PokeSort'),
+              title: const Text('PokeSort App help'),
               subtitle: const Text(
-                'Learn how to create binders, add cards, and navigate the app.',
+                'Need help learning the app? \nLearn how to create binders, add cards, and navigate the app.',
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
@@ -35,7 +35,7 @@ class HelpHubPage extends StatelessWidget {
               leading: const Icon(Icons.catching_pokemon),
               title: const Text('Pokémon Card Help'),
               subtitle: const Text(
-                'Learn what card fields like rarity, stage, and variant mean.',
+                'Need help understanding your card? \nDiscover what you need to add a card into the app, along with links!',
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {

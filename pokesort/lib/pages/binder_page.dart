@@ -197,7 +197,7 @@ class _BinderPageState extends State<BinderPage> {
               child: Image.file(
                 File(card.imagePath),
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
+                errorBuilder: (_, _, _) =>
                     const Icon(Icons.image_not_supported),
               ),
             ),
@@ -215,7 +215,7 @@ class _BinderPageState extends State<BinderPage> {
                   Text(
                     _cardVariantLabel(card).isEmpty
                         ? rarityToString(card.rarity)
-                        : '${rarityToString(card.rarity)} • ${_cardVariantLabel(card)}',
+                        : '${cardCategoryToString(card.category)} card',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,

@@ -178,7 +178,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
                   width: 48,
                   height: 64,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox(
+                  errorBuilder: (_, _, _) => const SizedBox(
                     width: 48,
                     height: 64,
                     child: Icon(Icons.image_not_supported),
@@ -284,7 +284,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
 
     return ListView.separated(
       itemCount: results.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final card = results[index];
         final variantLabel = _cardVariantLabel(card);
@@ -297,7 +297,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
               width: 48,
               height: 64,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox(
+              errorBuilder: (_, _, _) => const SizedBox(
                 width: 48,
                 height: 64,
                 child: Icon(Icons.image_not_supported),
