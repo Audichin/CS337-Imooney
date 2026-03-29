@@ -85,12 +85,52 @@ class BinderDatabase {
     return maps.map((map) => Binder.fromMap(map)).toList();
   }
 
+  Future<int> deleteBinder(int binderId) async {
+    final db = await database;
+
+    await db.delete(
+      'cards',
+      where: 'binderId = ?',
+      whereArgs: [binderId],
+    );
+
+    return db.delete(
+      'binders',
+      where: 'id = ?',
+      whereArgs: [binderId],
+    );
+  }
+
   Future<int> insertCard(CardModel card) async {
     final db = await database;
     return db.insert(
       'cards',
       card.toMap(),
       conflictAlgorithm: ConflictAlgorithm.abort,
+    );
+  }
+
+  Future<int> updateCard(CardModel card) async {
+    final db = await database;
+    if (card.id == null) {
+      throw ArgumentError('Cannot update a card with no id.');
+    }
+
+    return db.update(
+      'cards',
+      card.toMap(),
+      where: 'id = ?',
+      whereArgs: [card.id],
+      conflictAlgorithm: ConflictAlgorithm.abort,
+    );
+  }
+
+  Future<int> deleteCard(int cardId) async {
+    final db = await database;
+    return db.delete(
+      'cards',
+      where: 'id = ?',
+      whereArgs: [cardId],
     );
   }
 
@@ -108,7 +148,10 @@ class BinderDatabase {
 
   Future<List<CardModel>> getAllCards() async {
     final db = await database;
-    final maps = await db.query('cards', orderBy: 'name COLLATE NOCASE ASC');
+    final maps = await db.query(
+      'cards',
+      orderBy: 'name COLLATE NOCASE ASC',
+    );
 
     return maps.map((map) => CardModel.fromMap(map)).toList();
   }
@@ -118,28 +161,26 @@ class BinderDatabase {
     required int pageNumber,
     required int row,
     required int column,
+    int? excludeCardId,
   }) async {
     final db = await database;
+
+    String where =
+        'binderId = ? AND pageNumber = ? AND row = ? AND column = ?';
+    final whereArgs = <Object?>[binderId, pageNumber, row, column];
+
+    if (excludeCardId != null) {
+      where += ' AND id != ?';
+      whereArgs.add(excludeCardId);
+    }
+
     final maps = await db.query(
       'cards',
-      where: 'binderId = ? AND pageNumber = ? AND row = ? AND column = ?',
-      whereArgs: [binderId, pageNumber, row, column],
+      where: where,
+      whereArgs: whereArgs,
       limit: 1,
     );
 
     return maps.isNotEmpty;
-  }
-
-  Future<int> deleteCard(int cardId) async {
-    final db = await database;
-    return db.delete('cards', where: 'id = ?', whereArgs: [cardId]);
-  }
-
-  Future<int> deleteBinder(int binderId) async {
-    final db = await database;
-
-    await db.delete('cards', where: 'binderId = ?', whereArgs: [binderId]);
-
-    return db.delete('binders', where: 'id = ?', whereArgs: [binderId]);
   }
 }

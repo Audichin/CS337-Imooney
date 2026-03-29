@@ -8,15 +8,15 @@ import '../models/card_model.dart';
 import '../services/binder_database.dart';
 import '../services/image_service.dart';
 import 'add_card_page.dart';
-
 import 'card_detail_page.dart';
-
-import '../search/app_search.dart';
 
 class BinderPage extends StatefulWidget {
   final Binder binder;
 
-  const BinderPage({super.key, required this.binder});
+  const BinderPage({
+    super.key,
+    required this.binder,
+  });
 
   @override
   State<BinderPage> createState() => _BinderPageState();
@@ -26,6 +26,59 @@ class _BinderPageState extends State<BinderPage> {
   late Future<List<CardModel>> _cardsFuture;
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCards();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _loadCards() {
+    _cardsFuture = BinderDatabase.instance.getCardsByBinder(widget.binder.id!);
+  }
+
+  Future<void> _addCard() async {
+    final imagePath = await ImageService.takePicture(context);
+    if (imagePath == null) return;
+    if (!mounted) return;
+
+    final added = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddCardPage(
+          binderId: widget.binder.id!,
+          binderPageCount: widget.binder.pageCount,
+          imagePath: imagePath,
+        ),
+      ),
+    );
+
+    if (added == true) {
+      setState(_loadCards);
+    }
+  }
+
+  Future<void> _openCardDetails(CardModel card) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CardDetailPage(
+          card: card,
+          binderPageCount: widget.binder.pageCount,
+        ),
+      ),
+    );
+
+    if (changed == true) {
+      setState(_loadCards);
+    }
+  }
 
   Future<void> _deleteBinder() async {
     final confirmed = await showDialog<bool>(
@@ -59,6 +112,24 @@ class _BinderPageState extends State<BinderPage> {
     Navigator.pop(context, true);
   }
 
+  CardModel? _findCardForSlot(
+    List<CardModel> cards,
+    int pageNumber,
+    int row,
+    int column,
+  ) {
+    try {
+      return cards.firstWhere(
+        (card) =>
+            card.pageNumber == pageNumber &&
+            card.row == row &&
+            card.column == column,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   String _cardVariantLabel(CardModel card) {
     switch (card.category) {
       case CardCategory.pokemon:
@@ -90,85 +161,18 @@ class _BinderPageState extends State<BinderPage> {
     }
   }
 
-  Future<void> _openCardSearch() async {
-    final cards = await BinderDatabase.instance.getCardsByBinder(
-      widget.binder.id!,
-    );
+  int _currentPageNumber() => _currentPageIndex + 1;
 
-    if (!mounted) return;
+  int _sheetNumberForPage(int pageNumber) => (pageNumber + 1) ~/ 2;
 
-    await showSearch(
-      context: context,
-      delegate: CardSearchDelegate(binder: widget.binder, cards: cards),
-    );
-  }
+  bool _isFrontSide(int pageNumber) => pageNumber.isOdd;
 
-  Future<void> _openCardDetails(CardModel card) async {
-    final deleted = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(builder: (_) => CardDetailPage(card: card)),
-    );
+  String _pageStatusLabel() {
+    final pageNumber = _currentPageNumber();
+    final sheetNumber = _sheetNumberForPage(pageNumber);
+    final side = _isFrontSide(pageNumber) ? 'Front' : 'Back';
 
-    if (deleted == true) {
-      setState(_loadCards);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCards();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _loadCards() {
-    _cardsFuture = BinderDatabase.instance.getCardsByBinder(widget.binder.id!);
-  }
-
-  Future<void> _addCard() async {
-    debugPrint('Add card pressed');
-
-    final imagePath = await ImageService.takePicture(context);
-    if (imagePath == null) return;
-    if (!mounted) return;
-
-    final added = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AddCardPage(
-          binderId: widget.binder.id!,
-          binderPageCount: widget.binder.pageCount,
-          imagePath: imagePath,
-        ),
-      ),
-    );
-
-    if (added == true) {
-      setState(_loadCards);
-    }
-  }
-
-  CardModel? _findCardForSlot(
-    List<CardModel> cards,
-    int pageNumber,
-    int row,
-    int column,
-  ) {
-    try {
-      return cards.firstWhere(
-        (card) =>
-            card.pageNumber == pageNumber &&
-            card.row == row &&
-            card.column == column,
-      );
-    } catch (_) {
-      return null;
-    }
+    return 'PokeSort Page $pageNumber • IRL Sheet $sheetNumber • $side';
   }
 
   Widget _buildSlot(CardModel? card) {
@@ -180,7 +184,10 @@ class _BinderPageState extends State<BinderPage> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(
-          child: Icon(Icons.add_photo_alternate_outlined, color: Colors.grey),
+          child: Icon(
+            Icons.add_photo_alternate_outlined,
+            color: Colors.grey,
+          ),
         ),
       );
     }
@@ -197,7 +204,7 @@ class _BinderPageState extends State<BinderPage> {
               child: Image.file(
                 File(card.imagePath),
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
+                errorBuilder: (_, __, ___) =>
                     const Icon(Icons.image_not_supported),
               ),
             ),
@@ -242,7 +249,7 @@ class _BinderPageState extends State<BinderPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
       child: GridView.count(
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 68),
@@ -256,11 +263,10 @@ class _BinderPageState extends State<BinderPage> {
   }
 
   Widget _buildBottomBar() {
-    final int currentPage = _currentPageIndex + 1;
+    final int currentPage = _currentPageNumber();
     final int? previousPage = currentPage > 1 ? currentPage - 1 : null;
-    final int? nextPage = currentPage < widget.binder.pageCount
-        ? currentPage + 1
-        : null;
+    final int? nextPage =
+        currentPage < widget.binder.pageCount ? currentPage + 1 : null;
 
     return SafeArea(
       top: false,
@@ -299,18 +305,6 @@ class _BinderPageState extends State<BinderPage> {
                     onPressed: _addCard,
                     icon: const Icon(Icons.add),
                     label: const Text('Add Card'),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: _openCardSearch,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(48, 40),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                    ),
-                    child: const Icon(Icons.search),
                   ),
                   const Spacer(),
                   SizedBox(
@@ -354,6 +348,16 @@ class _BinderPageState extends State<BinderPage> {
             icon: const Icon(Icons.delete_outline),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(28),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              _pageStatusLabel(),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ),
       ),
       extendBody: true,
       body: FutureBuilder<List<CardModel>>(
