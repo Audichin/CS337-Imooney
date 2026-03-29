@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/binder.dart';
 import '../models/card_enums.dart';
 import '../models/card_model.dart';
+import '../search/app_search.dart';
 import '../services/binder_database.dart';
 import '../services/image_service.dart';
 import 'add_card_page.dart';
@@ -13,10 +14,7 @@ import 'card_detail_page.dart';
 class BinderPage extends StatefulWidget {
   final Binder binder;
 
-  const BinderPage({
-    super.key,
-    required this.binder,
-  });
+  const BinderPage({super.key, required this.binder});
 
   @override
   State<BinderPage> createState() => _BinderPageState();
@@ -62,6 +60,19 @@ class _BinderPageState extends State<BinderPage> {
     if (added == true) {
       setState(_loadCards);
     }
+  }
+
+  Future<void> _openCardSearch() async {
+    final cards = await BinderDatabase.instance.getCardsByBinder(
+      widget.binder.id!,
+    );
+
+    if (!mounted) return;
+
+    await showSearch(
+      context: context,
+      delegate: CardSearchDelegate(binder: widget.binder, cards: cards),
+    );
   }
 
   Future<void> _openCardDetails(CardModel card) async {
@@ -172,7 +183,7 @@ class _BinderPageState extends State<BinderPage> {
     final sheetNumber = _sheetNumberForPage(pageNumber);
     final side = _isFrontSide(pageNumber) ? 'Front' : 'Back';
 
-    return 'Virtual Page $pageNumber • Binder Sheet $sheetNumber • $side side';
+    return 'Current Page $pageNumber • IRL Page $sheetNumber • $side side';
   }
 
   Widget _buildSlot(CardModel? card) {
@@ -184,10 +195,7 @@ class _BinderPageState extends State<BinderPage> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(
-          child: Icon(
-            Icons.add_photo_alternate_outlined,
-            color: Colors.grey,
-          ),
+          child: Icon(Icons.add_photo_alternate_outlined, color: Colors.grey),
         ),
       );
     }
@@ -249,14 +257,14 @@ class _BinderPageState extends State<BinderPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: GridView.count(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 68),
+        padding: const EdgeInsets.only(bottom: 82),
         crossAxisCount: 3,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.68,
+        childAspectRatio: 0.72,
         children: slots,
       ),
     );
@@ -265,8 +273,9 @@ class _BinderPageState extends State<BinderPage> {
   Widget _buildBottomBar() {
     final int currentPage = _currentPageNumber();
     final int? previousPage = currentPage > 1 ? currentPage - 1 : null;
-    final int? nextPage =
-        currentPage < widget.binder.pageCount ? currentPage + 1 : null;
+    final int? nextPage = currentPage < widget.binder.pageCount
+        ? currentPage + 1
+        : null;
 
     return SafeArea(
       top: false,
@@ -277,55 +286,66 @@ class _BinderPageState extends State<BinderPage> {
           child: Material(
             color: Colors.black.withOpacity(0.22),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Row(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    color: Colors.white,
-                    onPressed: previousPage != null
-                        ? () {
-                            _pageController.previousPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        : null,
-                    icon: const Icon(Icons.chevron_left),
+                  Text(
+                    _pageStatusLabel(),
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
                   ),
-                  SizedBox(
-                    width: 24,
-                    child: Text(
-                      previousPage?.toString() ?? '',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const Spacer(),
-                  FilledButton.icon(
-                    onPressed: _addCard,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Card'),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: 24,
-                    child: Text(
-                      nextPage?.toString() ?? '',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  IconButton(
-                    color: Colors.white,
-                    onPressed: nextPage != null
-                        ? () {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        : null,
-                    icon: const Icon(Icons.chevron_right),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      IconButton(
+                        color: Colors.white,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: previousPage != null
+                            ? () {
+                                _pageController.previousPage(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            : null,
+                        icon: const Icon(Icons.chevron_left),
+                      ),
+                      const Spacer(),
+                      FilledButton.icon(
+                        onPressed: _addCard,
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Card'),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filled(
+                        onPressed: _openCardSearch,
+                        tooltip: 'Search cards',
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.search),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        color: Colors.white,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: nextPage != null
+                            ? () {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            : null,
+                        icon: const Icon(Icons.chevron_right),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -348,16 +368,6 @@ class _BinderPageState extends State<BinderPage> {
             icon: const Icon(Icons.delete_outline),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(28),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              _pageStatusLabel(),
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-        ),
       ),
       extendBody: true,
       body: FutureBuilder<List<CardModel>>(
