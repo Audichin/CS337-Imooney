@@ -172,7 +172,7 @@ class _BinderPageState extends State<BinderPage> {
     final sheetNumber = _sheetNumberForPage(pageNumber);
     final side = _isFrontSide(pageNumber) ? 'Front' : 'Back';
 
-    return 'PokeSort Page $pageNumber • IRL Sheet $sheetNumber • $side';
+    return 'Virtual Page $pageNumber • Binder Sheet $sheetNumber • $side side';
   }
 
   Widget _buildSlot(CardModel? card) {
