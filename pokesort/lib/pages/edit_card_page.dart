@@ -55,13 +55,15 @@ class _EditCardPageState extends State<EditCardPage> {
     final card = widget.card;
 
     _nameController = TextEditingController(text: card.name);
-    _priceController =
-        TextEditingController(text: card.price?.toString() ?? '');
+    _priceController = TextEditingController(
+      text: card.price?.toString() ?? '',
+    );
     _pageController = TextEditingController(text: card.pageNumber.toString());
     _rowController = TextEditingController(text: card.row.toString());
     _columnController = TextEditingController(text: card.column.toString());
-    _customPokemonVariantController =
-        TextEditingController(text: card.customPokemonVariant ?? '');
+    _customPokemonVariantController = TextEditingController(
+      text: card.customPokemonVariant ?? '',
+    );
 
     _selectedCategory = card.category;
     _selectedLanguage = card.cardLanguage;
@@ -74,8 +76,7 @@ class _EditCardPageState extends State<EditCardPage> {
 
     _selectedTrainerVariant = card.trainerVariant ?? TrainerVariant.normal;
 
-    _selectedItemStadiumKind =
-        card.itemStadiumKind ?? ItemStadiumKind.item;
+    _selectedItemStadiumKind = card.itemStadiumKind ?? ItemStadiumKind.item;
     _selectedItemStadiumVariant =
         card.itemStadiumVariant ?? ItemStadiumVariant.normal;
 
@@ -172,14 +173,17 @@ class _EditCardPageState extends State<EditCardPage> {
       category: _selectedCategory,
       cardLanguage: _selectedLanguage,
       rarity: _selectedRarity,
-      type: (_selectedCategory == CardCategory.pokemon ||
+      type:
+          (_selectedCategory == CardCategory.pokemon ||
               _selectedCategory == CardCategory.energy)
           ? _selectedType
           : null,
       stage: _selectedCategory == CardCategory.pokemon ? _selectedStage : null,
-      pokemonVariant:
-          _selectedCategory == CardCategory.pokemon ? _selectedPokemonVariant : null,
-      customPokemonVariant: _selectedCategory == CardCategory.pokemon &&
+      pokemonVariant: _selectedCategory == CardCategory.pokemon
+          ? _selectedPokemonVariant
+          : null,
+      customPokemonVariant:
+          _selectedCategory == CardCategory.pokemon &&
               _selectedPokemonVariant == PokemonVariant.notInList
           ? _customPokemonVariantController.text.trim()
           : null,
@@ -189,7 +193,8 @@ class _EditCardPageState extends State<EditCardPage> {
       itemStadiumKind: _selectedCategory == CardCategory.itemOrStadium
           ? _selectedItemStadiumKind
           : null,
-      itemStadiumVariant: _selectedCategory == CardCategory.itemOrStadium &&
+      itemStadiumVariant:
+          _selectedCategory == CardCategory.itemOrStadium &&
               _selectedItemStadiumKind == ItemStadiumKind.item
           ? _selectedItemStadiumVariant
           : null,
@@ -211,29 +216,17 @@ class _EditCardPageState extends State<EditCardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Card Category',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text('Card Category', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         SegmentedButton<CardCategory>(
           segments: const [
-            ButtonSegment(
-              value: CardCategory.pokemon,
-              label: Text('Pokémon'),
-            ),
-            ButtonSegment(
-              value: CardCategory.trainer,
-              label: Text('Trainer'),
-            ),
+            ButtonSegment(value: CardCategory.pokemon, label: Text('Pokémon')),
+            ButtonSegment(value: CardCategory.trainer, label: Text('Trainer')),
             ButtonSegment(
               value: CardCategory.itemOrStadium,
               label: Text('Item/Stadium'),
             ),
-            ButtonSegment(
-              value: CardCategory.energy,
-              label: Text('Energy'),
-            ),
+            ButtonSegment(value: CardCategory.energy, label: Text('Energy')),
           ],
           selected: {_selectedCategory},
           onSelectionChanged: (selection) {
@@ -401,7 +394,9 @@ class _EditCardPageState extends State<EditCardPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) =>
-                        (value == null || value.trim().isEmpty) ? 'Required' : null,
+                        (value == null || value.trim().isEmpty)
+                        ? 'Required'
+                        : null,
                   ),
                   const SizedBox(height: 16),
 

@@ -43,10 +43,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
   final List<Binder> binders;
   final List<CardModel> cards;
 
-  CollectionSearchDelegate({
-    required this.binders,
-    required this.cards,
-  });
+  CollectionSearchDelegate({required this.binders, required this.cards});
 
   Map<int, Binder> get _binderById {
     return {
@@ -61,7 +58,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
 
     return binders.where((binder) {
       return binder.name.toLowerCase().contains(q) ||
-          binder.pageCount.toString().contains(q);
+          binder.virtualPageCount.toString().contains(q);
     }).toList();
   }
 
@@ -72,10 +69,12 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
     return cards.where((card) {
       final binderName = _binderById[card.binderId]?.name.toLowerCase() ?? '';
       final variantText = _cardVariantLabel(card).toLowerCase();
-      final typeText =
-          card.type == null ? '' : cardTypeToString(card.type!).toLowerCase();
-      final stageText =
-          card.stage == null ? '' : stageToString(card.stage!).toLowerCase();
+      final typeText = card.type == null
+          ? ''
+          : cardTypeToString(card.type!).toLowerCase();
+      final stageText = card.stage == null
+          ? ''
+          : stageToString(card.stage!).toLowerCase();
       final kindText = card.itemStadiumKind == null
           ? ''
           : itemStadiumKindToString(card.itemStadiumKind!).toLowerCase();
@@ -128,9 +127,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
     final cardResults = _filteredCards();
 
     if (binderResults.isEmpty && cardResults.isEmpty) {
-      return const Center(
-        child: Text('No binders or cards found.'),
-      );
+      return const Center(child: Text('No binders or cards found.'));
     }
 
     return ListView(
@@ -151,14 +148,12 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
                       backgroundImage: FileImage(File(binder.coverImage!)),
                     ),
               title: Text(binder.name),
-              subtitle: Text('${binder.pageCount} page(s)'),
+              subtitle: Text('${binder.virtualPageCount} page(s)'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => BinderPage(binder: binder),
-                  ),
+                  MaterialPageRoute(builder: (_) => BinderPage(binder: binder)),
                 );
               },
             );
@@ -175,7 +170,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
           ...cardResults.map((card) {
             final binder = _binderById[card.binderId];
             final binderName = binder?.name ?? 'Unknown Binder';
-            final binderPageCount = binder?.pageCount ?? 1;
+            final binderPageCount = binder?.virtualPageCount ?? 1;
             final variantLabel = _cardVariantLabel(card);
 
             return ListTile(
@@ -186,7 +181,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
                   width: 48,
                   height: 64,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox(
+                  errorBuilder: (_, _, _) => const SizedBox(
                     width: 48,
                     height: 64,
                     child: Icon(Icons.image_not_supported),
@@ -228,10 +223,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
   final Binder binder;
   final List<CardModel> cards;
 
-  CardSearchDelegate({
-    required this.binder,
-    required this.cards,
-  });
+  CardSearchDelegate({required this.binder, required this.cards});
 
   List<CardModel> _filteredCards() {
     final q = query.trim().toLowerCase();
@@ -239,10 +231,12 @@ class CardSearchDelegate extends SearchDelegate<void> {
 
     return cards.where((card) {
       final variantText = _cardVariantLabel(card).toLowerCase();
-      final typeText =
-          card.type == null ? '' : cardTypeToString(card.type!).toLowerCase();
-      final stageText =
-          card.stage == null ? '' : stageToString(card.stage!).toLowerCase();
+      final typeText = card.type == null
+          ? ''
+          : cardTypeToString(card.type!).toLowerCase();
+      final stageText = card.stage == null
+          ? ''
+          : stageToString(card.stage!).toLowerCase();
       final kindText = card.itemStadiumKind == null
           ? ''
           : itemStadiumKindToString(card.itemStadiumKind!).toLowerCase();
@@ -293,14 +287,12 @@ class CardSearchDelegate extends SearchDelegate<void> {
     final results = _filteredCards();
 
     if (results.isEmpty) {
-      return const Center(
-        child: Text('No cards found.'),
-      );
+      return const Center(child: Text('No cards found.'));
     }
 
     return ListView.separated(
       itemCount: results.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final card = results[index];
         final variantLabel = _cardVariantLabel(card);
@@ -313,7 +305,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
               width: 48,
               height: 64,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox(
+              errorBuilder: (_, _, _) => const SizedBox(
                 width: 48,
                 height: 64,
                 child: Icon(Icons.image_not_supported),
@@ -333,7 +325,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
               MaterialPageRoute(
                 builder: (_) => CardDetailPage(
                   card: card,
-                  binderPageCount: binder.pageCount,
+                  binderPageCount: binder.virtualPageCount,
                 ),
               ),
             );

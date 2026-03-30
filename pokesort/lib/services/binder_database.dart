@@ -22,7 +22,7 @@ class BinderDatabase {
 
     return openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -34,7 +34,7 @@ class BinderDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         coverImage TEXT,
-        pageCount INTEGER NOT NULL
+        sheetCount INTEGER NOT NULL
       )
     ''');
 
@@ -67,7 +67,7 @@ class BinderDatabase {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 5) {
+    if (oldVersion < 6) {
       await db.execute('DROP TABLE IF EXISTS cards');
       await db.execute('DROP TABLE IF EXISTS binders');
       await _createDB(db, newVersion);

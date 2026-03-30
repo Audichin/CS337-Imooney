@@ -30,9 +30,7 @@ class CardDetailPage extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -107,9 +105,7 @@ class CardDetailPage extends StatelessWidget {
         ];
 
       case CardCategory.energy:
-        return [
-          _detailRow(context, 'Type', cardTypeToString(card.type!)),
-        ];
+        return [_detailRow(context, 'Type', cardTypeToString(card.type!))];
     }
   }
 
@@ -117,10 +113,8 @@ class CardDetailPage extends StatelessWidget {
     final updated = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => EditCardPage(
-          card: card,
-          binderPageCount: binderPageCount,
-        ),
+        builder: (_) =>
+            EditCardPage(card: card, binderPageCount: binderPageCount),
       ),
     );
 
@@ -186,7 +180,7 @@ class CardDetailPage extends StatelessWidget {
             child: Image.file(
               File(card.imagePath),
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 height: 300,
                 alignment: Alignment.center,
                 color: Colors.grey.shade200,
@@ -195,10 +189,7 @@ class CardDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            card.name,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text(card.name, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
           _detailRow(context, 'Category', cardCategoryToString(card.category)),
           _detailRow(context, 'Language', languageToString(card.cardLanguage)),

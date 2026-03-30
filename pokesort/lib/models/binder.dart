@@ -2,21 +2,23 @@ class Binder {
   final int? id;
   final String name;
   final String? coverImage;
-  final int pageCount;
+  final int sheetCount;
 
   Binder({
     this.id,
     required this.name,
     this.coverImage,
-    required this.pageCount,
+    required this.sheetCount,
   });
+
+  int get virtualPageCount => sheetCount * 2;
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
       'coverImage': coverImage,
-      'pageCount': pageCount,
+      'sheetCount': sheetCount,
     };
   }
 
@@ -25,7 +27,7 @@ class Binder {
       id: map['id'] as int?,
       name: map['name'] as String,
       coverImage: map['coverImage'] as String?,
-      pageCount: map['pageCount'] as int,
+      sheetCount: map['sheetCount'] as int,
     );
   }
 }

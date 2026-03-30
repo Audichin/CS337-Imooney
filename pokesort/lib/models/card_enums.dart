@@ -98,6 +98,7 @@ enum PokemonVariant {
   radiant,
   shining,
   tagTeamGx,
+  teraEx,
   trainerPokemon,
   v,
   vmax,
@@ -139,6 +140,8 @@ String pokemonVariantToString(PokemonVariant variant) {
       return 'Tag Team GX';
     case PokemonVariant.trainerPokemon:
       return 'Trainer Pokémon';
+    case PokemonVariant.teraEx:
+      return 'TeraEx';
     case PokemonVariant.v:
       return 'V';
     case PokemonVariant.vmax:

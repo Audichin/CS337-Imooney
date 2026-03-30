@@ -51,7 +51,7 @@ class _BinderPageState extends State<BinderPage> {
       MaterialPageRoute(
         builder: (_) => AddCardPage(
           binderId: widget.binder.id!,
-          binderPageCount: widget.binder.pageCount,
+          binderPageCount: widget.binder.virtualPageCount,
           imagePath: imagePath,
         ),
       ),
@@ -81,7 +81,7 @@ class _BinderPageState extends State<BinderPage> {
       MaterialPageRoute(
         builder: (_) => CardDetailPage(
           card: card,
-          binderPageCount: widget.binder.pageCount,
+          binderPageCount: widget.binder.virtualPageCount
         ),
       ),
     );
@@ -183,7 +183,7 @@ class _BinderPageState extends State<BinderPage> {
     final sheetNumber = _sheetNumberForPage(pageNumber);
     final side = _isFrontSide(pageNumber) ? 'Front' : 'Back';
 
-    return 'Current Page $pageNumber • IRL Page $sheetNumber • $side side';
+    return 'Virtual Page $pageNumber • IRL Page $sheetNumber • $side side';
   }
 
   Widget _buildSlot(CardModel? card) {
@@ -212,7 +212,7 @@ class _BinderPageState extends State<BinderPage> {
               child: Image.file(
                 File(card.imagePath),
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
+                errorBuilder: (_, _, _) =>
                     const Icon(Icons.image_not_supported),
               ),
             ),
@@ -273,7 +273,7 @@ class _BinderPageState extends State<BinderPage> {
   Widget _buildBottomBar() {
     final int currentPage = _currentPageNumber();
     final int? previousPage = currentPage > 1 ? currentPage - 1 : null;
-    final int? nextPage = currentPage < widget.binder.pageCount
+    final int? nextPage = currentPage < widget.binder.virtualPageCount
         ? currentPage + 1
         : null;
 
@@ -381,7 +381,7 @@ class _BinderPageState extends State<BinderPage> {
 
           return PageView.builder(
             controller: _pageController,
-            itemCount: widget.binder.pageCount,
+            itemCount: widget.binder.virtualPageCount,
             onPageChanged: (index) {
               setState(() {
                 _currentPageIndex = index;

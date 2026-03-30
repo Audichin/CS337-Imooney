@@ -90,7 +90,7 @@ class _BinderListPageState extends State<BinderListPage> {
                       controller: pageCountController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Number of Pages',
+                        labelText: 'Number of Binder sheets (front/back)',
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -141,7 +141,7 @@ class _BinderListPageState extends State<BinderListPage> {
                       Binder(
                         name: name,
                         coverImage: coverImage,
-                        pageCount: pageCount,
+                        sheetCount: pageCount,
                       ),
                     );
 
@@ -171,7 +171,9 @@ class _BinderListPageState extends State<BinderListPage> {
           ? const CircleAvatar(child: Icon(Icons.book))
           : CircleAvatar(backgroundImage: FileImage(File(binder.coverImage!))),
       title: Text(binder.name),
-      subtitle: Text('${binder.pageCount} page(s)'),
+      subtitle: Text(
+        '${binder.sheetCount} sheet(s) • ${binder.virtualPageCount} PokeSort page(s)',
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         final changed = await Navigator.push<bool>(
@@ -210,7 +212,9 @@ class _BinderListPageState extends State<BinderListPage> {
 
           if (binders.isEmpty) {
             return const Center(
-              child: Text('You have no binders yet. Tap + to create one! \nPlease take a look at the ? for help!'),
+              child: Text(
+                'You have no binders yet. Tap + to create one! \n      Please take a look at the ? for help!',
+              ),
             );
           }
 
