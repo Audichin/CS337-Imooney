@@ -88,17 +88,9 @@ class BinderDatabase {
   Future<int> deleteBinder(int binderId) async {
     final db = await database;
 
-    await db.delete(
-      'cards',
-      where: 'binderId = ?',
-      whereArgs: [binderId],
-    );
+    await db.delete('cards', where: 'binderId = ?', whereArgs: [binderId]);
 
-    return db.delete(
-      'binders',
-      where: 'id = ?',
-      whereArgs: [binderId],
-    );
+    return db.delete('binders', where: 'id = ?', whereArgs: [binderId]);
   }
 
   Future<int> insertCard(CardModel card) async {
@@ -127,11 +119,7 @@ class BinderDatabase {
 
   Future<int> deleteCard(int cardId) async {
     final db = await database;
-    return db.delete(
-      'cards',
-      where: 'id = ?',
-      whereArgs: [cardId],
-    );
+    return db.delete('cards', where: 'id = ?', whereArgs: [cardId]);
   }
 
   Future<List<CardModel>> getCardsByBinder(int binderId) async {
@@ -148,10 +136,7 @@ class BinderDatabase {
 
   Future<List<CardModel>> getAllCards() async {
     final db = await database;
-    final maps = await db.query(
-      'cards',
-      orderBy: 'name COLLATE NOCASE ASC',
-    );
+    final maps = await db.query('cards', orderBy: 'name COLLATE NOCASE ASC');
 
     return maps.map((map) => CardModel.fromMap(map)).toList();
   }
@@ -165,8 +150,7 @@ class BinderDatabase {
   }) async {
     final db = await database;
 
-    String where =
-        'binderId = ? AND pageNumber = ? AND row = ? AND column = ?';
+    String where = 'binderId = ? AND pageNumber = ? AND row = ? AND column = ?';
     final whereArgs = <Object?>[binderId, pageNumber, row, column];
 
     if (excludeCardId != null) {

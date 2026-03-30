@@ -11,6 +11,8 @@ import '../services/image_service.dart';
 import 'add_card_page.dart';
 import 'card_detail_page.dart';
 
+import '../utils/page_mapping.dart';
+
 class BinderPage extends StatefulWidget {
   final Binder binder;
 
@@ -51,7 +53,7 @@ class _BinderPageState extends State<BinderPage> {
       MaterialPageRoute(
         builder: (_) => AddCardPage(
           binderId: widget.binder.id!,
-          binderPageCount: widget.binder.virtualPageCount,
+          binderSheetCount: widget.binder.sheetCount,
           imagePath: imagePath,
         ),
       ),
@@ -81,7 +83,7 @@ class _BinderPageState extends State<BinderPage> {
       MaterialPageRoute(
         builder: (_) => CardDetailPage(
           card: card,
-          binderPageCount: widget.binder.virtualPageCount
+          binderSheetCount: widget.binder.sheetCount,
         ),
       ),
     );
@@ -180,10 +182,9 @@ class _BinderPageState extends State<BinderPage> {
 
   String _pageStatusLabel() {
     final pageNumber = _currentPageNumber();
-    final sheetNumber = _sheetNumberForPage(pageNumber);
-    final side = _isFrontSide(pageNumber) ? 'Front' : 'Back';
-
-    return 'Virtual Page $pageNumber • IRL Page $sheetNumber • $side side';
+    final sheet = sheetFromVirtualPage(pageNumber);
+    final side = binderSideToString(sideFromVirtualPage(pageNumber));
+    return 'IRL Sheet $sheet • $side';
   }
 
   Widget _buildSlot(CardModel? card) {

@@ -8,6 +8,8 @@ import '../models/card_model.dart';
 import '../pages/binder_page.dart';
 import '../pages/card_detail_page.dart';
 
+import '../utils/page_mapping.dart';
+
 String _cardVariantLabel(CardModel card) {
   switch (card.category) {
     case CardCategory.pokemon:
@@ -191,8 +193,8 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
               title: Text(card.name),
               subtitle: Text(
                 variantLabel.isEmpty
-                    ? '$binderName • Pg ${card.pageNumber} • ${rarityToString(card.rarity)}'
-                    : '$binderName • Pg ${card.pageNumber} • ${rarityToString(card.rarity)} • $variantLabel',
+                    ? '$binderName • ${irlPageLabelFromVirtualPage(card.pageNumber)} • ${rarityToString(card.rarity)}'
+                    : '$binderName • Pg ${irlPageLabelFromVirtualPage(card.pageNumber)} • ${rarityToString(card.rarity)} • $variantLabel',
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
@@ -315,8 +317,8 @@ class CardSearchDelegate extends SearchDelegate<void> {
           title: Text(card.name),
           subtitle: Text(
             variantLabel.isEmpty
-                ? 'Pg ${card.pageNumber} • ${rarityToString(card.rarity)}'
-                : 'Pg ${card.pageNumber} • ${rarityToString(card.rarity)} • $variantLabel',
+                ? 'Pg ${irlPageLabelFromVirtualPage(card.pageNumber)} • ${rarityToString(card.rarity)}'
+                : 'Pg ${irlPageLabelFromVirtualPage(card.pageNumber)} • ${rarityToString(card.rarity)} • $variantLabel',
           ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {

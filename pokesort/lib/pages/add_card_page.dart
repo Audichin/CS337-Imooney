@@ -6,15 +6,17 @@ import '../models/card_enums.dart';
 import '../models/card_model.dart';
 import '../services/binder_database.dart';
 
+import '../utils/page_mapping.dart';
+
 class AddCardPage extends StatefulWidget {
   final int binderId;
-  final int binderPageCount;
+  final int binderSheetCount;
   final String imagePath;
 
   const AddCardPage({
     super.key,
     required this.binderId,
-    required this.binderPageCount,
+    required this.binderSheetCount,
     required this.imagePath,
   });
 
@@ -27,7 +29,8 @@ class _AddCardPageState extends State<AddCardPage> {
 
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
-  final _pageController = TextEditingController(text: '1');
+  final _sheetController = TextEditingController(text: '1');
+  BinderSide _selectedSide = BinderSide.front;
   final _rowController = TextEditingController(text: '1');
   final _columnController = TextEditingController(text: '1');
   final _customPokemonVariantController = TextEditingController();
@@ -53,7 +56,7 @@ class _AddCardPageState extends State<AddCardPage> {
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
-    _pageController.dispose();
+    _sheetController.dispose();
     _rowController.dispose();
     _columnController.dispose();
     _customPokemonVariantController.dispose();
@@ -103,7 +106,11 @@ class _AddCardPageState extends State<AddCardPage> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final pageNumber = int.parse(_pageController.text.trim());
+    final sheetNumber = int.parse(_sheetController.text.trim());
+    final pageNumber = virtualPageFromSheet(
+      sheetNumber: sheetNumber,
+      side: _selectedSide,
+    );
     final row = int.parse(_rowController.text.trim());
     final column = int.parse(_columnController.text.trim());
 
@@ -393,20 +400,50 @@ class _AddCardPageState extends State<AddCardPage> {
                   const SizedBox(height: 16),
 
                   TextFormField(
-                    controller: _pageController,
+                    controller: _sheetController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Page (1-${widget.binderPageCount})',
+                      labelText: 'IRL Sheet (1-${widget.binderSheetCount})',
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
                       final n = int.tryParse(value?.trim() ?? '');
                       if (n == null) return 'Enter a number';
-                      if (n < 1 || n > widget.binderPageCount) {
-                        return 'Must be 1-${widget.binderPageCount}';
+                      if (n < 1 || n > widget.binderSheetCount) {
+                        return 'Must be 1-${widget.binderSheetCount}';
                       }
                       return null;
                     },
+                  ),
+                  const SizedBox(height: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Side',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      SegmentedButton<BinderSide>(
+                        segments: const [
+                          ButtonSegment(
+                            value: BinderSide.front,
+                            label: Text('Front'),
+                          ),
+                          ButtonSegment(
+                            value: BinderSide.back,
+                            label: Text('Back'),
+                          ),
+                        ],
+                        selected: {_selectedSide},
+                        onSelectionChanged: (selection) {
+                          setState(() {
+                            _selectedSide = selection.first;
+                          });
+                        },
+                        showSelectedIcon: false,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 

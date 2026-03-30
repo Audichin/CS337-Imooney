@@ -7,6 +7,8 @@ import '../models/card_model.dart';
 import '../services/binder_database.dart';
 import 'edit_card_page.dart';
 
+import '../utils/page_mapping.dart';
+
 class CardDetailPage extends StatelessWidget {
   final CardModel card;
   final int binderPageCount;
@@ -201,9 +203,19 @@ class CardDetailPage extends StatelessWidget {
             'Price',
             card.price != null ? '\$${card.price!.toStringAsFixed(2)}' : 'N/A',
           ),
-          _detailRow(context, 'Page', card.pageNumber.toString()),
+          _detailRow(
+            context,
+            'IRL Sheet',
+            sheetFromVirtualPage(card.pageNumber).toString(),
+          ),
+          _detailRow(
+            context,
+            'Side',
+            binderSideToString(sideFromVirtualPage(card.pageNumber)),
+          ),
           _detailRow(context, 'Row', card.row.toString()),
           _detailRow(context, 'Column', card.column.toString()),
+          _detailRow(context, 'Pokesort Page', card.pageNumber.toString()),
         ],
       ),
     );

@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 
 import '../models/card_enums.dart';
 import '../models/card_model.dart';
-import '../services/binder_database.dart';
+
+import '../utils/page_mapping.dart';
 
 class EditCardPage extends StatefulWidget {
   final CardModel card;
-  final int binderPageCount;
+  final int binderSheetCount;
 
   const EditCardPage({
     super.key,
     required this.card,
-    required this.binderPageCount,
+    required this.binderSheetCount,
   });
 
   @override
@@ -25,7 +26,8 @@ class _EditCardPageState extends State<EditCardPage> {
 
   late final TextEditingController _nameController;
   late final TextEditingController _priceController;
-  late final TextEditingController _pageController;
+  late final TextEditingController _sheetController;
+  late BinderSide _selectedSide;
   late final TextEditingController _rowController;
   late final TextEditingController _columnController;
   late final TextEditingController _customPokemonVariantController;
@@ -58,7 +60,10 @@ class _EditCardPageState extends State<EditCardPage> {
     _priceController = TextEditingController(
       text: card.price?.toString() ?? '',
     );
-    _pageController = TextEditingController(text: card.pageNumber.toString());
+    _sheetController = TextEditingController(
+      text: sheetFromVirtualPage(card.pageNumber).toString(),
+    );
+    _selectedSide = sideFromVirtualPage(card.pageNumber);
     _rowController = TextEditingController(text: card.row.toString());
     _columnController = TextEditingController(text: card.column.toString());
     _customPokemonVariantController = TextEditingController(
@@ -88,7 +93,7 @@ class _EditCardPageState extends State<EditCardPage> {
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
-    _pageController.dispose();
+    _sheetController.dispose();
     _rowController.dispose();
     _columnController.dispose();
     _customPokemonVariantController.dispose();
@@ -138,7 +143,11 @@ class _EditCardPageState extends State<EditCardPage> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final pageNumber = int.parse(_pageController.text.trim());
+    final sheetNumber = int.parse(_sheetController.text.trim());
+    final pageNumber = virtualPageFromSheet(
+      sheetNumber: sheetNumber,
+      side: _selectedSide,
+    );
     final row = int.parse(_rowController.text.trim());
     final column = int.parse(_columnController.text.trim());
 
@@ -430,17 +439,17 @@ class _EditCardPageState extends State<EditCardPage> {
                   const SizedBox(height: 16),
 
                   TextFormField(
-                    controller: _pageController,
+                    controller: _sheetController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Page (1-${widget.binderPageCount})',
+                      labelText: 'Page (1-${widget.binderSheetCount})',
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
                       final n = int.tryParse(value?.trim() ?? '');
                       if (n == null) return 'Enter a number';
-                      if (n < 1 || n > widget.binderPageCount) {
-                        return 'Must be 1-${widget.binderPageCount}';
+                      if (n < 1 || n > widget.binderSheetCount) {
+                        return 'Must be 1-${widget.binderSheetCount}';
                       }
                       return null;
                     },
