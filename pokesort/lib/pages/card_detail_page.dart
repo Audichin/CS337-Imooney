@@ -11,12 +11,12 @@ import '../utils/page_mapping.dart';
 
 class CardDetailPage extends StatelessWidget {
   final CardModel card;
-  final int binderPageCount;
+  final int binderSheetCount;
 
   const CardDetailPage({
     super.key,
     required this.card,
-    required this.binderPageCount,
+    required this.binderSheetCount,
   });
 
   Widget _detailRow(BuildContext context, String label, String value) {
@@ -112,17 +112,17 @@ class CardDetailPage extends StatelessWidget {
   }
 
   Future<void> _editCard(BuildContext context) async {
-    final updated = await Navigator.push<bool>(
+    final updatedPageNumber = await Navigator.push<int>(
       context,
       MaterialPageRoute(
         builder: (_) =>
-            EditCardPage(card: card, binderPageCount: binderPageCount),
+            EditCardPage(card: card, binderSheetCount: binderSheetCount),
       ),
     );
 
     if (!context.mounted) return;
-    if (updated == true) {
-      Navigator.pop(context, true);
+    if (updatedPageNumber != null) {
+      Navigator.pop(context, updatedPageNumber);
     }
   }
 

@@ -17,7 +17,7 @@ enum CardType {
   grass,
   fire,
   water,
-  lightning,
+  electric,
   psychic,
   fighting,
   darkness,
@@ -129,7 +129,7 @@ String pokemonVariantToString(PokemonVariant variant) {
     case PokemonVariant.light:
       return 'Light';
     case PokemonVariant.megaEx:
-      return 'Mega (M EX)';
+      return 'Mega Ex';
     case PokemonVariant.prime:
       return 'Prime';
     case PokemonVariant.radiant:
@@ -141,7 +141,7 @@ String pokemonVariantToString(PokemonVariant variant) {
     case PokemonVariant.trainerPokemon:
       return 'Trainer Pokémon';
     case PokemonVariant.teraEx:
-      return 'TeraEx';
+      return 'Tera Ex';
     case PokemonVariant.v:
       return 'V';
     case PokemonVariant.vmax:

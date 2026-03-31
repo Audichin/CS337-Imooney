@@ -179,7 +179,7 @@ class _AddCardPageState extends State<AddCardPage> {
     await BinderDatabase.instance.insertCard(card);
 
     if (!mounted) return;
-    Navigator.pop(context, true);
+    Navigator.pop(context, pageNumber);
   }
 
   Widget _buildCategoryChooser() {

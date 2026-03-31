@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/card_enums.dart';
 import '../models/card_model.dart';
+import '../services/binder_database.dart';
 
 import '../utils/page_mapping.dart';
 
@@ -218,7 +219,7 @@ class _EditCardPageState extends State<EditCardPage> {
     await BinderDatabase.instance.updateCard(updatedCard);
 
     if (!mounted) return;
-    Navigator.pop(context, true);
+    Navigator.pop(context, pageNumber);
   }
 
   Widget _buildCategoryChooser() {
@@ -442,7 +443,7 @@ class _EditCardPageState extends State<EditCardPage> {
                     controller: _sheetController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Page (1-${widget.binderSheetCount})',
+                      labelText: 'IRL Sheet (1-${widget.binderSheetCount})',
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) {

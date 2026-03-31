@@ -41,6 +41,12 @@ String _cardVariantLabel(CardModel card) {
   }
 }
 
+Color _searchBackIconColor(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark
+      ? Colors.white
+      : Colors.black;
+}
+
 class CollectionSearchDelegate extends SearchDelegate<void> {
   final List<Binder> binders;
   final List<CardModel> cards;
@@ -119,7 +125,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
   Widget? buildLeading(BuildContext context) {
     return IconButton(
       onPressed: () => close(context, null),
-      icon: const Icon(Icons.arrow_back),
+      icon: Icon(Icons.arrow_back, color: _searchBackIconColor(context)),
     );
   }
 
@@ -172,7 +178,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
           ...cardResults.map((card) {
             final binder = _binderById[card.binderId];
             final binderName = binder?.name ?? 'Unknown Binder';
-            final binderPageCount = binder?.virtualPageCount ?? 1;
+            final binderSheetCount = binder?.sheetCount ?? 1;
             final variantLabel = _cardVariantLabel(card);
 
             return ListTile(
@@ -203,7 +209,7 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
                   MaterialPageRoute(
                     builder: (_) => CardDetailPage(
                       card: card,
-                      binderPageCount: binderPageCount,
+                      binderSheetCount: binderSheetCount,
                     ),
                   ),
                 );
@@ -280,7 +286,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
   Widget? buildLeading(BuildContext context) {
     return IconButton(
       onPressed: () => close(context, null),
-      icon: const Icon(Icons.arrow_back),
+      icon: Icon(Icons.arrow_back, color: _searchBackIconColor(context)),
     );
   }
 
@@ -327,7 +333,7 @@ class CardSearchDelegate extends SearchDelegate<void> {
               MaterialPageRoute(
                 builder: (_) => CardDetailPage(
                   card: card,
-                  binderPageCount: binder.virtualPageCount,
+                  binderSheetCount: binder.sheetCount,
                 ),
               ),
             );

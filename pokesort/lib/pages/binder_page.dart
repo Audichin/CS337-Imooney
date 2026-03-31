@@ -24,12 +24,13 @@ class BinderPage extends StatefulWidget {
 
 class _BinderPageState extends State<BinderPage> {
   late Future<List<CardModel>> _cardsFuture;
-  final PageController _pageController = PageController();
+  late PageController _pageController;
   int _currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: _currentPageIndex);
     _loadCards();
   }
 
@@ -43,12 +44,26 @@ class _BinderPageState extends State<BinderPage> {
     _cardsFuture = BinderDatabase.instance.getCardsByBinder(widget.binder.id!);
   }
 
+  Future<void> _reloadCards({int? targetPageNumber}) async {
+    final pageIndex = (targetPageNumber ?? _currentPageNumber()).clamp(
+      1,
+      widget.binder.virtualPageCount,
+    ) - 1;
+
+    setState(() {
+      _pageController.dispose();
+      _pageController = PageController(initialPage: pageIndex);
+      _loadCards();
+      _currentPageIndex = pageIndex;
+    });
+  }
+
   Future<void> _addCard() async {
     final imagePath = await ImageService.takePicture(context);
     if (imagePath == null) return;
     if (!mounted) return;
 
-    final added = await Navigator.push<bool>(
+    final addedPageNumber = await Navigator.push<int>(
       context,
       MaterialPageRoute(
         builder: (_) => AddCardPage(
@@ -59,8 +74,8 @@ class _BinderPageState extends State<BinderPage> {
       ),
     );
 
-    if (added == true) {
-      setState(_loadCards);
+    if (addedPageNumber != null) {
+      await _reloadCards(targetPageNumber: addedPageNumber);
     }
   }
 
@@ -78,7 +93,7 @@ class _BinderPageState extends State<BinderPage> {
   }
 
   Future<void> _openCardDetails(CardModel card) async {
-    final changed = await Navigator.push<bool>(
+    final result = await Navigator.push<Object?>(
       context,
       MaterialPageRoute(
         builder: (_) => CardDetailPage(
@@ -88,8 +103,13 @@ class _BinderPageState extends State<BinderPage> {
       ),
     );
 
-    if (changed == true) {
-      setState(_loadCards);
+    if (result is int) {
+      await _reloadCards(targetPageNumber: result);
+      return;
+    }
+
+    if (result == true) {
+      await _reloadCards();
     }
   }
 
@@ -175,10 +195,6 @@ class _BinderPageState extends State<BinderPage> {
   }
 
   int _currentPageNumber() => _currentPageIndex + 1;
-
-  int _sheetNumberForPage(int pageNumber) => (pageNumber + 1) ~/ 2;
-
-  bool _isFrontSide(int pageNumber) => pageNumber.isOdd;
 
   String _pageStatusLabel() {
     final pageNumber = _currentPageNumber();
@@ -285,7 +301,7 @@ class _BinderPageState extends State<BinderPage> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: Material(
-            color: Colors.black.withOpacity(0.22),
+            color: Colors.black.withValues(alpha: 0.22),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Column(
