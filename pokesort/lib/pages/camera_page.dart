@@ -11,7 +11,9 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
-  List<CameraDescription> cameras = [];
+  List<CameraDescription> _cameras = [];
+  int _selectedCameraIndex = 0;
+  bool _capturing = false;
 
   @override
   void initState() {
@@ -20,21 +22,71 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _initializeCamera() async {
-    cameras = await availableCameras();
+    final cameras = await availableCameras();
+    if (!mounted || cameras.isEmpty) return;
 
-    final controller = CameraController(cameras.first, ResolutionPreset.medium);
+    _cameras = cameras;
+    _selectedCameraIndex = _preferredCameraIndex(cameras);
+    await _setActiveCamera(_selectedCameraIndex);
+  }
+
+  int _preferredCameraIndex(List<CameraDescription> cameras) {
+    final backIndex = cameras.indexWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.back,
+    );
+    if (backIndex != -1) return backIndex;
+
+    final frontIndex = cameras.indexWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.front,
+    );
+    if (frontIndex != -1) return frontIndex;
+
+    return 0;
+  }
+
+  Future<void> _setActiveCamera(int index) async {
+    final previousController = _controller;
+    final controller = CameraController(
+      _cameras[index],
+      ResolutionPreset.medium,
+      enableAudio: false,
+    );
 
     final initializeFuture = controller.initialize();
 
     setState(() {
+      _selectedCameraIndex = index;
       _controller = controller;
       _initializeControllerFuture = initializeFuture;
     });
 
+    await previousController?.dispose();
     await initializeFuture;
 
-    if (mounted) {
-      setState(() {});
+    if (!mounted) {
+      await controller.dispose();
+      return;
+    }
+
+    setState(() {});
+  }
+
+  Future<void> _switchCamera() async {
+    if (_cameras.length < 2) return;
+    final nextIndex = (_selectedCameraIndex + 1) % _cameras.length;
+    await _setActiveCamera(nextIndex);
+  }
+
+  String _cameraLabel() {
+    if (_cameras.isEmpty) return 'Camera';
+
+    switch (_cameras[_selectedCameraIndex].lensDirection) {
+      case CameraLensDirection.front:
+        return 'Front Camera';
+      case CameraLensDirection.back:
+        return 'Back Camera';
+      case CameraLensDirection.external:
+        return 'External Camera';
     }
   }
 
@@ -47,7 +99,11 @@ class _CameraPageState extends State<CameraPage> {
   Future<void> _capture() async {
     try {
       if (_controller == null || _initializeControllerFuture == null) return;
+      if (_capturing) return;
 
+      setState(() {
+        _capturing = true;
+      });
       await _initializeControllerFuture!;
 
       final image = await _controller!.takePicture();
@@ -57,7 +113,37 @@ class _CameraPageState extends State<CameraPage> {
       Navigator.pop(context, image.path);
     } catch (e) {
       debugPrint('$e');
+      if (mounted) {
+        setState(() {
+          _capturing = false;
+        });
+      }
     }
+  }
+
+  Widget _buildPreview() {
+    final previewSize = _controller!.value.previewSize;
+    if (previewSize == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: ColoredBox(
+        color: Colors.black,
+        child: SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: previewSize.height,
+              height: previewSize.width,
+              child: CameraPreview(_controller!),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -67,49 +153,83 @@ class _CameraPageState extends State<CameraPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Take Picture")),
-      body: Stack(
-        children: [
-          FutureBuilder<void>(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Center(
-                  child: AspectRatio(
-                    aspectRatio: _controller!.value.aspectRatio,
-                    child: CameraPreview(_controller!),
+      appBar: AppBar(
+        title: const Text('Take Picture'),
+        actions: [
+          if (_cameras.length > 1)
+            IconButton(
+              tooltip: 'Switch camera',
+              onPressed: _switchCamera,
+              icon: const Icon(Icons.flip_camera_android),
+            ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Expanded(
+                child: FutureBuilder<void>(
+                  future: _initializeControllerFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return _buildPreview();
+                    }
+
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _cameraLabel(),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: GestureDetector(
-                onTap: _capture,
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(5),
+                  if (_cameras.length > 1)
+                    OutlinedButton.icon(
+                      onPressed: _switchCamera,
+                      icon: const Icon(Icons.cameraswitch_outlined),
+                      label: const Text('Switch'),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _capturing ? null : _capture,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 150),
+                  opacity: _capturing ? 0.6 : 1,
                   child: Container(
+                    width: 80,
+                    height: 80,
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: Colors.black,
                       shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(5),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: _capturing
+                          ? const Padding(
+                              padding: EdgeInsets.all(22),
+                              child: CircularProgressIndicator(strokeWidth: 3),
+                            )
+                          : null,
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

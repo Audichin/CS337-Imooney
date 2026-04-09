@@ -20,7 +20,7 @@ enum CardType {
   electric,
   psychic,
   fighting,
-  darkness,
+  dark,
   metal,
   fairy,
   dragon,
