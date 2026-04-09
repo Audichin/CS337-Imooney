@@ -9,7 +9,7 @@ class HelpHubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Help')),
+      appBar: AppBar(title: const Text('Need help?')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

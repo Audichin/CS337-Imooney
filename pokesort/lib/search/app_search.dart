@@ -10,6 +10,190 @@ import '../pages/card_detail_page.dart';
 
 import '../utils/page_mapping.dart';
 
+String _normalizeSearchText(String value) {
+  const replacements = {
+    'é': 'e',
+    'è': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'á': 'a',
+    'à': 'a',
+    'â': 'a',
+    'ä': 'a',
+    'í': 'i',
+    'ì': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ó': 'o',
+    'ò': 'o',
+    'ô': 'o',
+    'ö': 'o',
+    'ú': 'u',
+    'ù': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ñ': 'n',
+    'ç': 'c',
+  };
+
+  var normalized = value.toLowerCase();
+  replacements.forEach((key, replacement) {
+    normalized = normalized.replaceAll(key, replacement);
+  });
+  return normalized;
+}
+
+class _SearchFilters {
+  final String textQuery;
+  final int? virtualPage;
+  final int? sheetNumber;
+  final BinderSide? side;
+  final double? minPrice;
+  final double? maxPrice;
+  final bool hasIncompleteFilter;
+
+  const _SearchFilters({
+    required this.textQuery,
+    this.virtualPage,
+    this.sheetNumber,
+    this.side,
+    this.minPrice,
+    this.maxPrice,
+    this.hasIncompleteFilter = false,
+  });
+}
+
+double? _parsePriceValue(String value) {
+  final normalized = value.startsWith('.') ? '0$value' : value;
+  final parsed = double.tryParse(normalized);
+  if (parsed == null) return null;
+  return double.parse(parsed.toStringAsFixed(2));
+}
+
+double? _roundCardPrice(double? value) {
+  if (value == null) return null;
+  return double.parse(value.toStringAsFixed(2));
+}
+
+_SearchFilters _parseSearchFilters(String query) {
+  var remaining = _normalizeSearchText(query.trim());
+
+  int? virtualPage;
+  int? sheetNumber;
+  BinderSide? side;
+  double? minPrice;
+  double? maxPrice;
+  var hasIncompleteFilter = false;
+  const pricePattern = r'(?:\d+(?:\.\d+)?|\.\d+)';
+
+  final virtualPageMatch = RegExp(
+    r'\bpage\s*:\s*(\d+)\b',
+  ).firstMatch(remaining);
+  if (virtualPageMatch != null) {
+    virtualPage = int.tryParse(virtualPageMatch.group(1)!);
+    remaining = remaining.replaceFirst(virtualPageMatch.group(0)!, ' ');
+  }
+
+  final sheetMatch = RegExp(r'\bsheet\s*:\s*(\d+)\b').firstMatch(remaining);
+  if (sheetMatch != null) {
+    sheetNumber = int.tryParse(sheetMatch.group(1)!);
+    remaining = remaining.replaceFirst(sheetMatch.group(0)!, ' ');
+  }
+
+  final sideMatch = RegExp(r'\b(front|back)\b').firstMatch(remaining);
+  if (sideMatch != null) {
+    side = sideMatch.group(1) == 'front' ? BinderSide.front : BinderSide.back;
+    remaining = remaining.replaceFirst(sideMatch.group(0)!, ' ');
+  }
+
+  final rangeMatch = RegExp(
+    '\\bprice\\s*:\\s*($pricePattern)\\s*-\\s*($pricePattern)\\b',
+  ).firstMatch(remaining);
+  if (rangeMatch != null) {
+    minPrice = _parsePriceValue(rangeMatch.group(1)!);
+    maxPrice = _parsePriceValue(rangeMatch.group(2)!);
+    remaining = remaining.replaceFirst(rangeMatch.group(0)!, ' ');
+  }
+
+  final plusMatch = RegExp(
+    '\\bprice\\s*:\\s*($pricePattern)\\+\\b',
+  ).firstMatch(remaining);
+  if (plusMatch != null) {
+    minPrice = _parsePriceValue(plusMatch.group(1)!);
+    remaining = remaining.replaceFirst(plusMatch.group(0)!, ' ');
+  }
+
+  final comparisonMatch = RegExp(
+    '\\bprice\\s*:?\\s*(<=|>=|<|>)\\s*($pricePattern)\\b',
+  ).firstMatch(remaining);
+  if (comparisonMatch != null) {
+    final value = _parsePriceValue(comparisonMatch.group(2)!);
+    final operator = comparisonMatch.group(1);
+    if (operator == '<' || operator == '<=') {
+      maxPrice = value;
+    } else if (operator == '>' || operator == '>=') {
+      minPrice = value;
+    }
+    remaining = remaining.replaceFirst(comparisonMatch.group(0)!, ' ');
+  }
+
+  final incompletePriceMatch = RegExp(
+    r'\bprice\s*:?\s*(?:(?:<=|>=|<|>)\s*)?(?:(?:\d+(?:\.\d*)?|\.\d*)?(?:\s*-\s*(?:\d+(?:\.\d*)?|\.\d*)?)?\+?)?\s*$',
+  ).firstMatch(remaining);
+  if (incompletePriceMatch != null) {
+    final matchedText = incompletePriceMatch.group(0) ?? '';
+    if (matchedText.trim().isNotEmpty) {
+      remaining = remaining.replaceFirst(matchedText, ' ');
+      hasIncompleteFilter = true;
+    }
+  }
+
+  remaining = remaining.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  return _SearchFilters(
+    textQuery: remaining,
+    virtualPage: virtualPage,
+    sheetNumber: sheetNumber,
+    side: side,
+    minPrice: minPrice,
+    maxPrice: maxPrice,
+    hasIncompleteFilter: hasIncompleteFilter,
+  );
+}
+
+bool _matchesTextQuery(String textQuery, List<String> fields) {
+  if (textQuery.isEmpty) return true;
+  return fields.any((field) => _normalizeSearchText(field).contains(textQuery));
+}
+
+bool _matchesCardFilters(CardModel card, _SearchFilters filters) {
+  if (filters.virtualPage != null && card.pageNumber != filters.virtualPage) {
+    return false;
+  }
+
+  if (filters.sheetNumber != null &&
+      sheetFromVirtualPage(card.pageNumber) != filters.sheetNumber) {
+    return false;
+  }
+
+  if (filters.side != null &&
+      sideFromVirtualPage(card.pageNumber) != filters.side) {
+    return false;
+  }
+
+  final price = _roundCardPrice(card.price);
+  if (filters.minPrice != null &&
+      (price == null || price < filters.minPrice!)) {
+    return false;
+  }
+  if (filters.maxPrice != null &&
+      (price == null || price > filters.maxPrice!)) {
+    return false;
+  }
+
+  return true;
+}
+
 String _cardVariantLabel(CardModel card) {
   switch (card.category) {
     case CardCategory.pokemon:
@@ -61,46 +245,57 @@ class CollectionSearchDelegate extends SearchDelegate<void> {
   }
 
   List<Binder> _filteredBinders() {
-    final q = query.trim().toLowerCase();
-    if (q.isEmpty) return binders;
+    final filters = _parseSearchFilters(query);
+    if (filters.textQuery.isEmpty) return binders;
 
     return binders.where((binder) {
-      return binder.name.toLowerCase().contains(q) ||
-          binder.virtualPageCount.toString().contains(q);
+      return _matchesTextQuery(filters.textQuery, [
+        binder.name,
+        binder.virtualPageCount.toString(),
+        binder.sheetCount.toString(),
+      ]);
     }).toList();
   }
 
   List<CardModel> _filteredCards() {
-    final q = query.trim().toLowerCase();
-    if (q.isEmpty) return cards;
+    final filters = _parseSearchFilters(query);
+    if (filters.textQuery.isEmpty &&
+        filters.virtualPage == null &&
+        filters.sheetNumber == null &&
+        filters.side == null &&
+        filters.minPrice == null &&
+        filters.maxPrice == null) {
+      return cards;
+    }
 
     return cards.where((card) {
-      final binderName = _binderById[card.binderId]?.name.toLowerCase() ?? '';
-      final variantText = _cardVariantLabel(card).toLowerCase();
-      final typeText = card.type == null
-          ? ''
-          : cardTypeToString(card.type!).toLowerCase();
-      final stageText = card.stage == null
-          ? ''
-          : stageToString(card.stage!).toLowerCase();
+      final binderName = _binderById[card.binderId]?.name ?? '';
+      final variantText = _cardVariantLabel(card);
+      final typeText = card.type == null ? '' : cardTypeToString(card.type!);
+      final stageText = card.stage == null ? '' : stageToString(card.stage!);
       final kindText = card.itemStadiumKind == null
           ? ''
-          : itemStadiumKindToString(card.itemStadiumKind!).toLowerCase();
+          : itemStadiumKindToString(card.itemStadiumKind!);
 
-      return card.name.toLowerCase().contains(q) ||
-          binderName.contains(q) ||
-          cardCategoryToString(card.category).toLowerCase().contains(q) ||
-          languageToString(card.cardLanguage).toLowerCase().contains(q) ||
-          rarityToString(card.rarity).toLowerCase().contains(q) ||
-          typeText.contains(q) ||
-          stageText.contains(q) ||
-          variantText.contains(q) ||
-          kindText.contains(q) ||
-          ((card.legendary ?? false) ? 'legendary' : '').contains(q) ||
-          (card.forSale ? 'for sale' : 'not for sale').contains(q) ||
-          card.pageNumber.toString() == q ||
-          card.row.toString() == q ||
-          card.column.toString() == q;
+      return _matchesCardFilters(card, filters) &&
+          _matchesTextQuery(filters.textQuery, [
+            card.name,
+            binderName,
+            cardCategoryToString(card.category),
+            languageToString(card.cardLanguage),
+            rarityToString(card.rarity),
+            typeText,
+            stageText,
+            variantText,
+            kindText,
+            (card.legendary ?? false) ? 'legendary' : '',
+            card.forSale ? 'for sale' : 'not for sale',
+            card.pageNumber.toString(),
+            sheetFromVirtualPage(card.pageNumber).toString(),
+            binderSideToString(sideFromVirtualPage(card.pageNumber)),
+            card.row.toString(),
+            card.column.toString(),
+          ]);
     }).toList();
   }
 
@@ -234,34 +429,42 @@ class CardSearchDelegate extends SearchDelegate<void> {
   CardSearchDelegate({required this.binder, required this.cards});
 
   List<CardModel> _filteredCards() {
-    final q = query.trim().toLowerCase();
-    if (q.isEmpty) return cards;
+    final filters = _parseSearchFilters(query);
+    if (filters.textQuery.isEmpty &&
+        filters.virtualPage == null &&
+        filters.sheetNumber == null &&
+        filters.side == null &&
+        filters.minPrice == null &&
+        filters.maxPrice == null) {
+      return cards;
+    }
 
     return cards.where((card) {
-      final variantText = _cardVariantLabel(card).toLowerCase();
-      final typeText = card.type == null
-          ? ''
-          : cardTypeToString(card.type!).toLowerCase();
-      final stageText = card.stage == null
-          ? ''
-          : stageToString(card.stage!).toLowerCase();
+      final variantText = _cardVariantLabel(card);
+      final typeText = card.type == null ? '' : cardTypeToString(card.type!);
+      final stageText = card.stage == null ? '' : stageToString(card.stage!);
       final kindText = card.itemStadiumKind == null
           ? ''
-          : itemStadiumKindToString(card.itemStadiumKind!).toLowerCase();
+          : itemStadiumKindToString(card.itemStadiumKind!);
 
-      return card.name.toLowerCase().contains(q) ||
-          cardCategoryToString(card.category).toLowerCase().contains(q) ||
-          languageToString(card.cardLanguage).toLowerCase().contains(q) ||
-          rarityToString(card.rarity).toLowerCase().contains(q) ||
-          typeText.contains(q) ||
-          stageText.contains(q) ||
-          variantText.contains(q) ||
-          kindText.contains(q) ||
-          ((card.legendary ?? false) ? 'legendary' : '').contains(q) ||
-          (card.forSale ? 'for sale' : 'not for sale').contains(q) ||
-          card.pageNumber.toString() == q ||
-          card.row.toString() == q ||
-          card.column.toString() == q;
+      return _matchesCardFilters(card, filters) &&
+          _matchesTextQuery(filters.textQuery, [
+            card.name,
+            cardCategoryToString(card.category),
+            languageToString(card.cardLanguage),
+            rarityToString(card.rarity),
+            typeText,
+            stageText,
+            variantText,
+            kindText,
+            (card.legendary ?? false) ? 'legendary' : '',
+            card.forSale ? 'for sale' : 'not for sale',
+            card.pageNumber.toString(),
+            sheetFromVirtualPage(card.pageNumber).toString(),
+            binderSideToString(sideFromVirtualPage(card.pageNumber)),
+            card.row.toString(),
+            card.column.toString(),
+          ]);
     }).toList();
   }
 

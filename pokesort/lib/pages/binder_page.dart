@@ -45,10 +45,12 @@ class _BinderPageState extends State<BinderPage> {
   }
 
   Future<void> _reloadCards({int? targetPageNumber}) async {
-    final pageIndex = (targetPageNumber ?? _currentPageNumber()).clamp(
-      1,
-      widget.binder.virtualPageCount,
-    ) - 1;
+    final pageIndex =
+        (targetPageNumber ?? _currentPageNumber()).clamp(
+          1,
+          widget.binder.virtualPageCount,
+        ) -
+        1;
 
     setState(() {
       _pageController.dispose();
@@ -200,7 +202,7 @@ class _BinderPageState extends State<BinderPage> {
     final pageNumber = _currentPageNumber();
     final sheet = sheetFromVirtualPage(pageNumber);
     final side = binderSideToString(sideFromVirtualPage(pageNumber));
-    return 'IRL Sheet $sheet • $side';
+    return 'Page $sheet • $side';
   }
 
   Widget _buildSlot(CardModel? card) {
@@ -342,11 +344,17 @@ class _BinderPageState extends State<BinderPage> {
                         label: const Text('Add Card'),
                       ),
                       const SizedBox(width: 8),
-                      IconButton.filled(
+                      FilledButton.icon(
                         onPressed: _openCardSearch,
-                        tooltip: 'Search cards',
-                        visualDensity: VisualDensity.compact,
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
                         icon: const Icon(Icons.search),
+                        label: const Text('Search'),
                       ),
                       const Spacer(),
                       IconButton(
