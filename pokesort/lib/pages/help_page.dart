@@ -51,7 +51,7 @@ class HelpPage extends StatelessWidget {
                   'Tap save to create the binder.',
                 ],
                 note:
-                    'Each sheet has a front and back, so the app may show more usable pages than the number of physical sheets.',
+                    'Each page in your binder has a front and back, which are individual sheets, be sure to check which side of the page your card goes on!',
               ),
             ),
           ),
