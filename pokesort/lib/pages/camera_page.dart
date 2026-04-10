@@ -122,24 +122,19 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Widget _buildPreview() {
-    final previewSize = _controller!.value.previewSize;
-    if (previewSize == null) {
+    final aspectRatio = _controller!.value.aspectRatio;
+    if (aspectRatio == 0) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: ColoredBox(
-        color: Colors.black,
-        child: SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: previewSize.height,
-              height: previewSize.width,
-              child: CameraPreview(_controller!),
-            ),
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: ColoredBox(
+          color: Colors.black,
+          child: AspectRatio(
+            aspectRatio: aspectRatio,
+            child: CameraPreview(_controller!),
           ),
         ),
       ),
@@ -167,67 +162,76 @@ class _CameraPageState extends State<CameraPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
+          child: Center(
+            child: Column(
+              children: [
               Expanded(
                 child: FutureBuilder<void>(
                   future: _initializeControllerFuture,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return _buildPreview();
-                    }
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return _buildPreview();
+                      }
 
-                    return const Center(child: CircularProgressIndicator());
-                  },
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                  ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  _cameraLabel(),
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Text(
-                      _cameraLabel(),
-                      style: Theme.of(context).textTheme.titleMedium,
+                  if (_cameras.length > 1)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 24),
+                      child: IconButton.filledTonal(
+                        tooltip: 'Switch camera',
+                        onPressed: _switchCamera,
+                        icon: const Icon(Icons.cameraswitch_outlined),
+                      ),
+                    ),
+                  GestureDetector(
+                    onTap: _capturing ? null : _capture,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 150),
+                      opacity: _capturing ? 0.6 : 1,
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: const BoxDecoration(
+                          color: Colors.black,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(5),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: _capturing
+                              ? const Padding(
+                                  padding: EdgeInsets.all(22),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
                     ),
                   ),
-                  if (_cameras.length > 1)
-                    OutlinedButton.icon(
-                      onPressed: _switchCamera,
-                      icon: const Icon(Icons.cameraswitch_outlined),
-                      label: const Text('Switch'),
-                    ),
                 ],
               ),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: _capturing ? null : _capture,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: _capturing ? 0.6 : 1,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(5),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: _capturing
-                          ? const Padding(
-                              padding: EdgeInsets.all(22),
-                              child: CircularProgressIndicator(strokeWidth: 3),
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-              ),
             ],
+          ),
           ),
         ),
       ),
